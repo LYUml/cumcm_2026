@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import linprog
 from scipy.sparse import lil_matrix
+from sklearn.cluster import KMeans
 
 _Q2_DIR = Path(__file__).resolve().parent / "02_q2"
 sys.path.insert(0, str(_Q2_DIR))
@@ -42,8 +43,9 @@ def split_residual_scenarios(load, pv, day, count=12):
     return current[None,:]+residuals
 
 
-def solve_adaptive_plan(scenarios_kw, price, initial_soc, terminal_floor, planning_penalty=5.0):
-    """Two-stage LP with common grid plan and scenario-adaptive battery recourse."""
+def solve_adaptive_plan(scenarios_kw, price, initial_soc, terminal_floor,
+                        planning_penalty=5.0, node_groups=None):
+    """Stochastic LP; optional node groups impose multistage nonanticipativity."""
     scenarios = np.asarray(scenarios_kw, float)
     ns, nt = scenarios.shape
     # common grid; then c,d,soc,emergency,spill for every scenario
@@ -61,8 +63,16 @@ def solve_adaptive_plan(scenarios_kw, price, initial_soc, terminal_floor, planni
         obj[d0+k*nt:d0+(k+1)*nt] = 1e-4/ns
         obj[e0+k*nt:e0+(k+1)*nt] = planning_penalty*price/ns
 
-    aeq = lil_matrix((2*ns*nt, nv))
-    beq = np.zeros(2*ns*nt)
+    na_pairs=[]
+    if node_groups is not None:
+        node_groups=np.asarray(node_groups)
+        for t in range(nt):
+            for group in np.unique(node_groups[:,t]):
+                members=np.flatnonzero(node_groups[:,t]==group)
+                na_pairs.extend((t,int(members[0]),int(k)) for k in members[1:])
+    base_rows=2*ns*nt
+    aeq = lil_matrix((base_rows+2*len(na_pairs), nv))
+    beq = np.zeros(base_rows+2*len(na_pairs))
     for k in range(ns):
         for t in range(nt):
             r = k*nt+t
@@ -80,6 +90,10 @@ def solve_adaptive_plan(scenarios_kw, price, initial_soc, terminal_floor, planni
                 aeq[r,s0+k*nt+t-1] = -1
             else:
                 beq[r] = initial_soc
+    for q,(t,ref,k) in enumerate(na_pairs):
+        r=base_rows+2*q
+        aeq[r,c0+k*nt+t]=1; aeq[r,c0+ref*nt+t]=-1
+        aeq[r+1,d0+k*nt+t]=1; aeq[r+1,d0+ref*nt+t]=-1
     bounds = (
         [(0,None)]*nt +
         [(0,ENERGY_MAX)]*(ns*nt) +
@@ -97,6 +111,28 @@ def solve_adaptive_plan(scenarios_kw, price, initial_soc, terminal_floor, planni
     if not res.success:
         raise RuntimeError(res.message)
     return res.x[g0:c0]
+
+
+def hierarchical_tree_groups(scenarios, stage_slots=24):
+    """Nested binary scenario tree; each block uses only earlier-block information."""
+    scenarios=np.asarray(scenarios,float); ns,nt=scenarios.shape
+    groups=np.zeros((ns,nt),dtype=int)
+    partitions=[np.arange(ns)]; next_id=0
+    for start in range(0,nt,stage_slots):
+        end=min(start+stage_slots,nt)
+        for members in partitions:
+            groups[members,start:end]=next_id; next_id+=1
+        if end==nt:
+            break
+        children=[]
+        for members in partitions:
+            if len(members)<=1:
+                children.append(members); continue
+            values=scenarios[members,start:end]
+            labels=KMeans(n_clusters=2,random_state=0,n_init=20).fit_predict(values)
+            children.extend(members[labels==label] for label in (0,1))
+        partitions=children
+    return groups
 
 
 def execute_feedback(grid, actual_net_kw, initial_soc):
@@ -177,7 +213,8 @@ def export_result2_actual(project_root,output_path,dates,price,grids,traces):
 
 
 def run_policy(net, price, terminal_floor, planning_penalty, scenario_count=12,
-               load=None, pv=None, scenario_mode='recent', initial_soc=SOC_INITIAL):
+               load=None, pv=None, scenario_mode='recent', initial_soc=SOC_INITIAL,
+               tree_stage_slots=0):
     soc=initial_soc; rows=[]; grids=[]; traces=[]
     for day in range(31,365):
         scenarios=(
@@ -185,7 +222,10 @@ def run_policy(net, price, terminal_floor, planning_penalty, scenario_count=12,
             if scenario_mode=='split' else
             historical_residual_scenarios(net[:day],day,scenario_count)
         )
-        grid=solve_adaptive_plan(scenarios,price,soc,terminal_floor,planning_penalty)
+        groups=(hierarchical_tree_groups(scenarios,tree_stage_slots)
+                if tree_stage_slots else None)
+        grid=solve_adaptive_plan(scenarios,price,soc,terminal_floor,planning_penalty,
+                                 node_groups=groups)
         start=soc; soc,flow=execute_feedback(grid,net[day],soc)
         pc=float(price@grid); ec=float((5*price)@flow[:,4])
         rows.append((pc,ec,pc+ec,flow[:,4].sum(),start,soc))
@@ -200,6 +240,8 @@ def main():
     parser.add_argument('--tag',default='')
     parser.add_argument('--scenario-mode',choices=['recent','split'],default='recent')
     parser.add_argument('--initial-soc',type=float)
+    parser.add_argument('--tree-stage-slots',type=int,default=0,
+                        help='positive value enables strict multistage nonanticipativity')
     args=parser.parse_args()
     project_root=Path(__file__).resolve().parent
     out=project_root/'02_q2/q2_near_optimal_outputs'; out.mkdir(exist_ok=True)
@@ -222,9 +264,11 @@ def main():
     for floor,penalty in configs:
         tic=time.perf_counter()
         rows,grids,traces=run_policy(net,price,floor,penalty,load=load,pv=pv,
-                                     scenario_mode=args.scenario_mode,initial_soc=initial_soc)
+                                     scenario_mode=args.scenario_mode,initial_soc=initial_soc,
+                                     tree_stage_slots=args.tree_stage_slots)
         record=dict(terminal_floor_kwh=floor,planning_penalty=penalty,
             scenario_mode=args.scenario_mode,initial_soc_kwh=initial_soc,
+            tree_stage_slots=args.tree_stage_slots,
             planned_yuan=float(rows[:,0].sum()),emergency_yuan=float(rows[:,1].sum()),
             total_yuan=float(rows[:,2].sum()),emergency_kwh=float(rows[:,3].sum()),
             min_soc=float(traces[:,:,1].min()),max_soc=float(traces[:,:,1].max()),
