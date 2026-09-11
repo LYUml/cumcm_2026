@@ -18,6 +18,7 @@ from q2_model import read_inputs, DT_HOURS, SOC_INITIAL, SOC_MIN, SOC_MAX
 from q2_near_optimal import (split_residual_scenarios, hierarchical_tree_groups,
     solve_adaptive_plan, execute_feedback, export_result2_actual)
 from q2_time_mapping import write_mapping_csv, interval_label
+from q2_availability import previous_row_curve
 
 OUT=ROOT/'02_q2/outputs'
 FLOOR=3000.; PENALTY=4.5; STAGE=24; NS=12
@@ -32,7 +33,7 @@ def warmup(net):
     """Return Feb-1 midnight SOC and Jan-31's pending 00:00-00:10 slot."""
     soc=SOC_INITIAL; pending=None
     for day in range(31):
-        grid=np.maximum(net[day-1],0)*DT_HOURS if day else np.zeros(144)
+        grid=np.maximum(previous_row_curve(net,day),0)*DT_HOURS
         if pending is not None:
             soc,_=one_interval(*pending,soc)
         soc,flow=execute_feedback(grid[:143],net[day,:143],soc)
@@ -134,6 +135,13 @@ def main():
     g0=solve_adaptive_plan(s0,price,5000,FLOOR,PENALTY,hierarchical_tree_groups(s0,STAGE))
     g1=solve_adaptive_plan(s1,price,5000,FLOOR,PENALTY,hierarchical_tree_groups(s1,STAGE))
     caus_plan=bool(np.array_equal(g0,g1))
+    # The pending row-(d-1) final slot occurs after the midnight commitment.
+    # Perturbing it must leave scenarios and the committed purchase unchanged.
+    lp=load.copy(); pp=pv.copy(); lp[cutoff-1,143]+=1e6; pp[cutoff-1,143]+=2e5
+    sp=split_residual_scenarios(lp[:cutoff],pp[:cutoff],cutoff,NS)
+    causal_pending=bool(np.array_equal(s0,sp))
+    gp=solve_adaptive_plan(sp,price,5000,FLOOR,PENALTY,hierarchical_tree_groups(sp,STAGE))
+    causal_pending_plan=bool(np.array_equal(g0,gp))
     _,fa=execute_feedback(g0,net[cutoff],5000)
     changed=net[cutoff].copy(); changed[72:]+=1e6
     _,fb=execute_feedback(g0,changed,5000)
@@ -155,6 +163,8 @@ def main():
         max_planning_vs_feedback_cost_gap_yuan=max_cost_gap,
         max_planning_vs_feedback_terminal_soc_gap_kwh=max_soc_gap,
         causality={'scenario_prefix_unchanged':caus_scen,'plan_prefix_unchanged':caus_plan,
+                   'pending_previous_row_last_slot_unchanged':causal_pending,
+                   'pending_previous_row_last_slot_plan_unchanged':causal_pending_plan,
                    'control_prefix_unchanged':caus_control})
     (OUT/'validation.json').write_text(json.dumps(validation,indent=2),encoding='utf-8')
     env={'python':platform.python_version(),'numpy':np.__version__,'pandas':pd.__version__}

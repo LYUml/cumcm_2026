@@ -22,6 +22,7 @@ from scipy.sparse import lil_matrix
 from sklearn.linear_model import Ridge
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from q2_availability import complete_residual_candidates
 
 
 # The bundled artifact runtime supplies openpyxl without shadowing the modeling
@@ -285,7 +286,7 @@ def solve_scenario_lp(
 
 def historical_residual_scenarios(net: np.ndarray, day: int, count: int = 12) -> np.ndarray:
     """Construct causal whole-day trajectories around the 7-day base forecast."""
-    candidates = np.arange(max(7, day - 56), day)
+    candidates = complete_residual_candidates(day, 56)
     # Prefer matching weekday residuals, then fill with the most recent residuals.
     matching = candidates[(day - candidates) % 7 == 0]
     remaining = candidates[~np.isin(candidates, matching)][::-1]

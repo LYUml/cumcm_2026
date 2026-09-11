@@ -4,8 +4,8 @@ This directory contains one authoritative corrected Q2 implementation and a sepa
 
 ## Structure
 
-- `src/` — reusable model, stochastic policy, time mapping, and the one small legacy comparison input required by the comparison figure.
-- `scripts/` — executable final pipeline. Run `run_final.py`, then `make_delivery.py`.
+- `src/` — reusable model, stochastic policy, time mapping, vendored figure-style helper, and the one small legacy comparison input required by the comparison figure.
+- `scripts/` — executable final and comparison pipelines. `run_model_comparison.py` restores the six-policy comparison under the same strict information boundary.
 - `paper/` — the current English Q2 manuscript only.
 - `outputs/` — authoritative workbook, CSV/NPZ/JSON results, and PNG/PDF figures.
 - `docs/` — reproduction instructions and changelog.
@@ -15,6 +15,7 @@ This directory contains one authoritative corrected Q2 implementation and a sepa
 
 ```bash
 python3 02_q2/scripts/run_final.py
+python3 02_q2/scripts/run_model_comparison.py
 python3 02_q2/scripts/make_delivery.py
 python3 02_q2/scripts/validate_paper.py
 ```

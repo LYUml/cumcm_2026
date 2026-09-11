@@ -28,18 +28,20 @@ from q2_model import (
     load_workbook,
 )
 from q2_time_mapping import four_hour_blocks, interval_label
+from q2_availability import complete_residual_candidates, slotwise_median, previous_row_curve
 
 
 def split_residual_scenarios(load, pv, day, count=12):
-    """Causal cycle/trend baseline plus coherent historical whole-day errors."""
+    """Midnight-causal baseline plus fully observed historical daily errors."""
     def baseline(j):
-        # Weekly load cycle; robust recent PV level/trend. All indices are < j.
+        # Historical residuals are reconstructed after row j is complete.
         return load[j-7] - np.median(pv[j-7:j],axis=0)
-    candidates=np.arange(max(7,day-56),day)
+    # The current baseline is slot-wise: row day-1 slot 143 is still pending.
+    current=load[day-7] - slotwise_median(pv,day,7)
+    candidates=complete_residual_candidates(day,56)
     matching=candidates[(day-candidates)%7==0]
     remaining=candidates[~np.isin(candidates,matching)][::-1]
     chosen=np.concatenate([matching[::-1],remaining])[:count]
-    current=baseline(day)
     residuals=np.asarray([load[j]-pv[j]-baseline(j) for j in chosen])
     return current[None,:]+residuals
 
@@ -170,7 +172,7 @@ def causal_january_warmup(net):
     soc=SOC_INITIAL
     for day in range(31):
         # Day 1 has no prior observation; later days use only yesterday's curve.
-        grid=np.maximum(net[day-1],0)*DT_HOURS if day else np.zeros(144)
+        grid=np.maximum(previous_row_curve(net,day),0)*DT_HOURS
         soc,_=execute_feedback(grid,net[day],soc)
     return soc
 

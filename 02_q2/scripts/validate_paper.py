@@ -20,6 +20,7 @@ def main() -> None:
     daily = pd.read_csv(OUT / "specified_dates_purchase.csv")
     storage = pd.read_csv(OUT / "specified_dates_storage.csv")
     emergency = pd.read_csv(OUT / "specified_dates_emergency.csv")
+    comparison = pd.read_csv(OUT / "model_comparison/comparison.csv")
 
     required = [
         money(validation["planned_yuan"]),
@@ -39,11 +40,18 @@ def main() -> None:
     for date in expected_dates:
         assert date in text, f"paper is missing required date {date}"
 
+    assert len(comparison) == 6 and comparison["model"].nunique() == 6
+    assert comparison["selected"].sum() == 1
+    for value in comparison["total_yuan"] / 1e6:
+        assert f"{value:.4f}" in text, f"paper is missing comparison total {value:.4f}"
+
     for rel in ("../outputs/q2_cost_chronology.png",
+                "../outputs/q2_model_comparison.png",
                 "../outputs/q2_representative_day_corrected.png"):
         assert rel in text and (PAPER.parent / rel).resolve().exists(), rel
 
     forbidden = ["13,168,516.81", "617,373.55", "13,785,890.36",
+                 "13,790,230.54", "15,260 scenario", "on 68 days",
                  "actual daily hard constraint is 3000"]
     for stale in forbidden:
         assert stale not in text, f"stale claim remains: {stale}"

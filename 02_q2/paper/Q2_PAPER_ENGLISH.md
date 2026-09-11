@@ -44,7 +44,7 @@ The first term depends on the committed schedule; the second is recomputed from 
 
 ## B.2 Initialization and evaluation period
 
-The simulation starts with 6000 kWh on January 1, 2025. With no preceding observation, the January 1 scheduled purchase is zero. On subsequent January days, the schedule is the nonnegative part of the previous day's net-load curve, converted to energy. The causal controller in Section 6.1.4 advances storage throughout this warm-up, producing 10800 kWh at 00:00 on February 1.
+The simulation starts with 6000 kWh on January 1, 2025. With no preceding observation, the January 1 scheduled purchase is zero. On subsequent January days, the schedule is the nonnegative part of the previous row's net-load curve, converted to energy. Because that row's last interval has not ended at midnight, its final slot is backed off to the most recent complete row (or zero on 2 January). The causal controller in Section 6.1.4 advances storage throughout this warm-up, producing 10800 kWh at 00:00 on February 1.
 
 All comparisons use this common February initial state and the 334 days from February 1 to December 31, 2025, matching the dates required for result2.xlsx in Appendix 2 of Problem C. January costs are excluded. The reported amount is an eleven-month evaluation cost, not a twelve-month operating bill.
 
@@ -66,11 +66,11 @@ We construct a central forecast, represent its uncertainty through historical da
 
 ### 6.1.2 Central forecast and daily residual scenarios
 
-Load and PV generation have different temporal structures. We use load from the same weekday one week earlier and median PV output at the same interval over the preceding seven days:
+Load and PV generation have different temporal structures. We use load from the same weekday one week earlier and median PV output among observations available at midnight. Let $\mathcal A_{d,t}$ contain the preceding seven row indices, except that $d-1$ is excluded when $t=144$ because its 00:00--00:10 interval is still pending. Then
 $$
 \widehat P^{N,0}_{d,t}
 =P^L_{d-7,t}
--\operatorname{median}\{P^{PV}_{d-7,t},\ldots,P^{PV}_{d-1,t}\}.
+-\operatorname{median}\{P^{PV}_{j,t}:j\in\mathcal A_{d,t}\}.
 \tag{6.1}
 $$
 The weekly lag represents recurring demand patterns, while the median estimates recent PV levels robustly. This parsimonious baseline supplies the center of the scenario distribution; it does not explicitly forecast the next day's weather.
@@ -80,7 +80,7 @@ $$
 r_{j,t}=P^{N,\mathrm{act}}_{j,t}-\widehat P^{N,0}_{j,t}.
 \tag{6.2}
 $$
-Each historical forecast is reconstructed using observations preceding $j$. From the previous 56 days, subject to availability of the seven-day lag, we select same-weekday residuals first and fill the remaining places with the most recent eligible days. Twelve selected paths give
+Each historical forecast is reconstructed using observations preceding $j$. From the previous 56 days, subject to availability of the seven-day lag, we select same-weekday residuals first and fill the remaining places with the most recent eligible days. Only complete residual rows through $d-2$ are eligible; row $d-1$ is not patched or partially reused. Twelve selected paths give
 $$
 P^{N,(s)}_{d,t}=\widehat P^{N,0}_{d,t}+r_{j_s,t},
 \qquad s=1,\ldots,12,\qquad \pi_s=\frac1{12}.
@@ -158,13 +158,13 @@ S_i^{+}=S_i^{-}+\eta_cC_i-D_i/\eta_d,
 $$
 Physical execution follows chronological time rather than spreadsheet row order. At midnight on date $d$, row $d$ is first committed using the current state. The already committed last interval of row $d-1$ is then executed over 00:00–00:10, followed by intervals 1–143 of row $d$ over 00:10–24:00. This feedback rule uses only the current interval measurement and stored energy. It prevents simultaneous charging and discharging, confines emergency purchases to the remaining deficit, and respects storage limits. It is a feasible operating rule, not a claim of optimal real-time control. Equation (P1) settles each physical interval using the purchase row to which the official template assigns it.
 
-The daily procedure is: observe the civil-midnight state; generate twelve scenarios from data strictly before date $d$; solve (6.5)–(6.6); commit row $d$; execute the pending final interval of row $d-1$ and then the 143 row-$d$ intervals ending by midnight; and repeat. Row $d$'s final interval is executed after the next midnight decision. This ordering removes the previous ten-minute look-ahead.
+The daily procedure is: observe the civil-midnight state; generate twelve scenarios from complete rows through $d-2$ and the available slots of row $d-1$; solve (6.5)–(6.6); commit row $d$; execute the pending final interval of row $d-1$ and then the 143 row-$d$ intervals ending by midnight; and repeat. Row $d$'s final interval is executed after the next midnight decision. Both the state transition and the forecast builder therefore respect the same midnight information boundary.
 
 ## 6.2 Results and Interpretation
 
 ### 6.2.1 Comparison definitions and evidence status
 
-Archived experiments compare complete purchasing policies using the same dates, initial stored energy, physical controller, settlement rule, and their common legacy chronology. Point-forecast policies use
+We recomputed six complete purchasing policies using the same dates, initial stored energy, physical controller, settlement rule, and strict midnight information boundary. Point-forecast policies use
 $$
 \widehat P^{N,\tau}_{d,t}
 =b_{d,t}+Q_\tau\{P^{N,\mathrm{act}}_{j,t}-b_{j,t}:j\in\mathcal H_d\},
@@ -183,7 +183,7 @@ For one interval without storage or salvage value, underage and overage costs ar
 | Four-hour tree | Twelve separate-baseline residual paths | Nodewise actions; 3000 kWh scenario terminal floor |
 | Two-stage relaxation | Same type of residual paths as the tree | Unrestricted scenario-specific actions; 3000 kWh floor |
 
-Daily cyclic storage means that the planned final state equals that day's planning initial state. All archived policies use the same feedback rule, whose realized final state is free within physical limits. Because their forecast, planning structure, terminal policy, and tuned settings differ, this is a complete-policy comparison rather than an isolated estimate of the value of nonanticipativity. These archived values are not combined arithmetically with the corrected final run.
+Daily cyclic storage means that the planned final state equals that day's planning initial state. All policies use the same feedback rule, whose realized final state is free within physical limits. Because their forecast, planning structure, terminal policy, and tuned settings differ, this is a complete-policy comparison rather than an isolated estimate of the value of nonanticipativity.
 
 ### 6.2.2 Overall expenditure
 
@@ -191,34 +191,47 @@ Table 2 reports the authoritative corrected backtest, rounded independently to f
 
 | Policy | Day-ahead cost | Emergency cost | Total cost |
 |---|---:|---:|---:|
-| **Four-hour tree (selected, corrected chronology)** | **13.1720** | **0.6183** | **13.7902** |
+| **Four-hour tree (selected, strict midnight availability)** | **13.1631** | **0.7302** | **13.8932** |
 
 *Table 2. Authoritative February–December 2025 expenditure, million CNY.*
 
-The reported objective contains only paid scheduled energy and realized emergency energy; unused energy receives no credit, and final inventory receives no salvage value. The corrected chronology raises total expenditure by CNY 4,340.18 relative to the same selected configuration under the legacy chronology, an increase of approximately 0.0315%.
+The reported objective contains only paid scheduled energy and realized emergency energy; unused energy receives no credit, and final inventory receives no salvage value. Relative to the legacy implementation, strict enforcement of the midnight information boundary raises the selected policy's total expenditure by CNY 107,318.96 (0.7785%).
 
 The selected configuration yields
 $$
 \begin{aligned}
-J_{\mathrm{plan}}&=13\,171\,963.91\ \mathrm{CNY},\\
-J_{\mathrm{emg}}&=618\,266.63\ \mathrm{CNY},\\
-J&=\boxed{13\,790\,230.54\ \mathrm{CNY}}.
+J_{\mathrm{plan}}&=13\,163\,054.77\ \mathrm{CNY},\\
+J_{\mathrm{emg}}&=730\,154.55\ \mathrm{CNY},\\
+J&=\boxed{13\,893\,209.32\ \mathrm{CNY}}.
 \end{aligned}
 \tag{6.11}
 $$
-Emergency expenditure accounts for 4.48% of the total. This is the selected nonanticipative planning configuration among the tested settings, not a certified minimum over all causal policies.
+Emergency expenditure accounts for 5.26% of the total. This is the selected nonanticipative planning configuration among the tested settings, not a certified minimum over all causal policies.
 
 ### 6.2.3 Chronology correction
 
 ![Chronology correction comparison](../outputs/q2_cost_chronology.png)
 
-*Figure 1. Legacy and corrected realized expenditure for the selected four-hour-tree configuration. The correction changes when the midnight state is observed; it does not change the tariff or reported units.*
+*Figure 1. Legacy and strictly causal realized expenditure for the selected four-hour-tree configuration. The correction affects both the state transition and the measurements available to forecasting at midnight; it does not change the tariff or reported units.*
 
-The change is small in expenditure but material in interpretation: the old run used the state after the 00:00–00:10 interval when preparing the plan nominally issued at 00:00. The corrected run commits first and only then replays that pending interval. We retain the tree as the principal model because its surrogate storage decisions respect the specified nodewise information structure, not because it is the least-cost executable backtest among every tested configuration.
+The old run used the state after the 00:00–00:10 interval when preparing the plan nominally issued at 00:00. An intermediate revision fixed that ordering but still allowed forecasting to read the pending interval as the last cell of row $d-1$. The final implementation excludes that measurement from the recent PV statistic, residual candidates, and January persistence rule. We retain the tree as the principal model because its surrogate storage decisions respect the specified nodewise information structure, not because of an assumed cost advantage.
 
-### 6.2.4 Same-parameter information-constraint comparison
+### 6.2.4 Recomputed policy comparison and information constraints
 
-The archived matched-parameter comparison at $\lambda=0.9$ gives CNY 13.9856 million for the two-stage relaxation and CNY 13.7859 million for the four-hour tree under their common legacy chronology. It is mechanism evidence only: relaxing surrogate information constraints cannot worsen the surrogate optimum, but may produce a purchase schedule that performs differently under the feedback controller. The relaxation's internal trajectory violating nodewise information constraints does not make its committed purchase row physically unexecutable.
+![Recomputed policy comparison](../outputs/q2_model_comparison.png)
+
+| Policy | Day-ahead cost | Emergency cost | Total cost |
+|---|---:|---:|---:|
+| **Four-hour tree (selected)** | **13.1631** | **0.7302** | **13.8932** |
+| Two-stage relaxation | 12.7122 | 1.3822 | 14.0944 |
+| Separate $Q_{0.8}$ | 13.4808 | 0.7242 | 14.2050 |
+| Fixed-action scenarios | 13.8222 | 0.5594 | 14.3815 |
+| Direct $Q_{0.8}$ | 13.6943 | 0.7876 | 14.4819 |
+| Separate $Q_{0.5}$ | 12.1866 | 3.2575 | 15.4441 |
+
+*Table 3 and Figure 2. Complete-policy comparison under the common strict chronology, million CNY. The selected row remains bold even though selection is based on the tree's information structure rather than hindsight cost alone.*
+
+At matched scenario construction, reserve, penalty, and execution settings, the two-stage relaxation costs CNY 14.0944 million and the four-hour tree costs CNY 13.8932 million in realized feedback replay. This is mechanism evidence only: relaxing surrogate information constraints cannot worsen the surrogate objective, but its committed schedule can perform differently under a distinct feedback controller. The relaxation's internal trajectory violating nodewise information constraints does not make its purchase row physically unexecutable.
 
 ### 6.2.5 Sensitivity
 
@@ -226,41 +239,43 @@ With the shortage multiplier fixed at 4.5 and the scenario terminal floor fixed 
 
 ### 6.2.6 Execution validation and cases
 
-Across 48,096 realized intervals, the corrected run has maximum energy-balance residual $1.14\times10^{-13}$ kWh and zero inter-row state-linking error. Stored energy remains within 1200–10800 kWh, with no simultaneous charging/discharging and no emergency purchase during actual charging. The actual civil-midnight state is below 3000 kWh on 68 days. Hence 3000 kWh is a scenario-planning reserve, not an actual daily hard constraint.
+Across 48,096 realized intervals, the corrected run has maximum energy-balance residual $1.14\times10^{-13}$ kWh and zero inter-row state-linking error. Stored energy remains within 1200–10800 kWh, with no simultaneous charging/discharging and no emergency purchase during actual charging. The actual civil-midnight state is below 3000 kWh on 74 days. Hence 3000 kWh is a scenario-planning reserve, not an actual daily hard constraint.
 
-The surrogate has no simultaneous charge/discharge, but it has 15,260 scenario intervals with emergency purchase and charging together. Replaying every scenario with the feedback rule yields 452 scenario-day terminal states below 3000 kWh. The maximum planning-versus-feedback terminal-state gap is 5573.44 kWh, and the maximum daily internal-cost gap is CNY 22,356.03. The method is therefore an approximate purchase-decision method, not a strict optimum for the executed closed loop.
+The surrogate has no simultaneous charge/discharge, but it has 15,200 scenario intervals with emergency purchase and charging together. Replaying every scenario with the feedback rule yields 478 scenario-day terminal states below 3000 kWh. The maximum planning-versus-feedback terminal-state gap is 5392.32 kWh, and the maximum daily internal-cost gap is CNY 21,650.08. The method is therefore an approximate purchase-decision method, not a strict optimum for the executed closed loop.
 
-Daily inputs and execution are causal, but settings were selected after comparisons on the same evaluation period. The results establish historical feasibility and expenditure; independent performance requires parameters fixed before a separate test period.
+### 6.2.7 Information Availability and Scope of Validation
 
-### 6.2.7 Representative daily operation
+The causality suite perturbs (i) all rows from day $d$ onward, (ii) specifically row $d-1$ slot 144, and (iii) the latter half of the realized control day. In all cases, earlier scenarios, committed purchases, or controls remain bitwise unchanged as applicable. This directly covers the pending-ten-minute defect that the earlier prefix test missed. Thus the final reported run no longer carries the earlier known leakage limitation. The source timestamp semantics remain an explicit modeling assumption, and settings were selected after comparisons on the same evaluation period; the results establish historical feasibility and expenditure rather than independently validated generalization.
+
+### 6.2.8 Representative daily operation
 
 ![Representative daily purchasing and storage operation](../outputs/q2_representative_day_corrected.png)
 
-*Figure 2. Realized operation of the selected four-hour tree policy on the day whose total cost is closest to the median of the 334 daily costs; the earliest date breaks a tie. Panel (a) converts interval energy purchases to interval-average power for comparison with net load. Emergency supply is shown separately and is additional to the committed purchase. Panel (b) shows the actual stored energy, with physical bounds at 1.2 and 10.8 MWh. The selection rule uses realized costs only to choose an illustration after simulation and does not influence the purchase decisions.*
+*Figure 3. Realized operation of the selected four-hour tree policy on the day whose total cost is closest to the median of the 334 daily costs; the earliest date breaks a tie. The panels show supply, signed battery action, and stored energy. The selection rule uses realized costs only to choose an illustration after simulation and does not influence purchase decisions.*
 
-The selected date is March 16, 2025, with total expenditure of CNY 44,369.25 and 1.64 kWh of emergency purchases. It is only the closest observed daily cost to the annual median, not an automatically “typical” operating day. On this date the low-price committed surplus charges the store; later deficits discharge it, and the small residual shortage is settled as emergency energy. The committed schedule remains fixed throughout the day.
+The selected date is May 1, 2025, with total expenditure of CNY 44,485.23 and 1658.70 kWh of emergency purchases. It is only the closest observed daily cost to the annual median, not an automatically “typical” operating day. The trajectory shows substantial residual shortage after stored energy is depleted toward its lower bound, while committed surpluses in other intervals recharge the store. The committed schedule remains fixed throughout the day.
 
-### 6.2.8 Required-date results
+### 6.2.9 Required-date results
 
 | Date | 10:00–10:10 | 12:00–12:10 | 14:00–14:10 | 16:00–16:10 | 18:00–18:10 | 20:00–20:10 | Daily plan (kWh) | Plan cost (CNY) | Emergency cost (CNY) | Total cost (CNY) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 2025-03-20 | 0.00 | 572.28 | 0.00 | 424.29 | 717.03 | 0.00 | 67,158.37 | 41,021.27 | 1,776.99 | 42,798.26 |
-| 2025-06-21 | 0.00 | 0.00 | 0.00 | 134.66 | 388.23 | 0.00 | 35,850.34 | 20,659.27 | 0.00 | 20,659.27 |
-| 2025-09-23 | 0.00 | 575.15 | 0.00 | 447.76 | 805.93 | 17.12 | 71,198.35 | 44,247.27 | 0.00 | 44,247.27 |
-| 2025-12-21 | 0.00 | 1,010.03 | 0.00 | 818.97 | 727.69 | 0.00 | 98,633.26 | 63,692.56 | 119.15 | 63,811.71 |
+| 2025-03-20 | 0.00 | 601.32 | 0.00 | 384.07 | 715.50 | 0.00 | 68,432.21 | 41,755.67 | 1,385.89 | 43,141.56 |
+| 2025-06-21 | 0.00 | 0.00 | 0.00 | 134.66 | 388.23 | 0.00 | 36,123.17 | 20,770.51 | 0.00 | 20,770.51 |
+| 2025-09-23 | 0.00 | 575.15 | 0.00 | 406.83 | 805.93 | 17.12 | 71,337.35 | 44,207.16 | 0.00 | 44,207.16 |
+| 2025-12-21 | 0.00 | 1,010.03 | 0.00 | 818.97 | 727.69 | 0.00 | 98,611.43 | 63,689.25 | 119.15 | 63,808.40 |
 
 Table 4 reports natural-day storage operation. Each interval cell is charge/discharge energy in kWh.
 
 | Date | 00:00–04:00 | 04:00–08:00 | 08:00–12:00 | 12:00–16:00 | 16:00–20:00 | 20:00–24:00 | $S(00{:}00)$ | $S(24{:}00)$ |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 2025-03-20 | 6,882.15 / 170.14 | 1,572.40 / 4,012.90 | 4,382.96 / 3,265.56 | 4,655.24 / 418.71 | 153.96 / 5,137.33 | 2,287.24 / 3,560.43 | 3,615.78 | 3,150.70 |
-| 2025-06-21 | 782.25 / 152.07 | 514.39 / 1,849.25 | 8,329.77 / 0.00 | 0.00 / 0.00 | 139.46 / 4,918.06 | 2,818.74 / 3,123.44 | 4,359.93 | 4,527.37 |
-| 2025-09-23 | 7,746.02 / 22.26 | 1,241.24 / 5,650.97 | 5,006.68 / 2,387.94 | 5,265.63 / 454.71 | 131.96 / 4,709.38 | 2,329.44 / 4,007.25 | 2,928.48 | 3,330.11 |
-| 2025-12-21 | 7,144.23 / 165.20 | 2,416.70 / 780.18 | 5,062.22 / 7,356.16 | 6,809.34 / 2,259.81 | 18.80 / 4,772.36 | 2,135.09 / 3,662.91 | 3,245.59 | 3,365.97 |
+| 2025-03-20 | 6,887.44 / 174.58 | 1,503.29 / 3,933.84 | 5,212.99 / 3,265.56 | 3,771.98 / 453.51 | 200.76 / 5,092.72 | 2,258.14 / 3,607.67 | 3,638.20 | 3,125.04 |
+| 2025-06-21 | 788.96 / 142.69 | 747.17 / 1,849.25 | 8,078.69 / 0.00 | 0.00 / 0.00 | 139.46 / 4,918.06 | 2,818.74 / 3,123.44 | 4,359.93 | 4,527.37 |
+| 2025-09-23 | 7,758.21 / 14.23 | 1,220.79 / 5,545.36 | 5,133.51 / 2,387.94 | 5,009.48 / 454.71 | 266.25 / 4,879.17 | 2,324.99 / 3,986.91 | 2,926.03 | 3,280.91 |
+| 2025-12-21 | 7,143.08 / 164.53 | 2,373.79 / 767.41 | 5,089.81 / 7,327.91 | 6,806.28 / 2,307.92 | 18.80 / 4,772.36 | 2,135.09 / 3,662.91 | 3,270.30 | 3,365.97 |
 
 *Table 4. Charge/discharge energy and civil-midnight storage, kWh. The six blocks are assembled across adjacent official purchase rows where required.*
 
-Emergency purchases occur on 20 March at 20:40–20:50 (193.19 kWh) and 21:30–22:00 (91.64 kWh), and on 21 December at 08:00–08:10 (20.51 kWh); the other two dates have none. Full-precision values are retained in `../outputs/specified_dates_storage.csv` and `../outputs/specified_dates_emergency.csv`. These interval labels follow the corrected official-template mapping.
+Emergency purchases occur on 20 March at 20:40–20:50 (145.47 kWh) and 21:30–22:00 (78.87 kWh), and on 21 December at 08:00–08:10 (20.51 kWh); the other two dates have none. Full-precision values are retained in `../outputs/specified_dates_storage.csv` and `../outputs/specified_dates_emergency.csv`. These interval labels follow the corrected official-template mapping.
 
 # C. Contribution to Model Evaluation and Further Discussion
 
@@ -286,11 +301,12 @@ This appendix supports integration and is excluded from the main Problem 2 chapt
 | Final costs, daily results and validation | `../outputs/` |
 | Final workbook | `../outputs/result2.xlsx` |
 | Full numerical and planning trajectories | `../outputs/selected_policy_numeric_trace.npz` |
+| Recomputed six-policy comparison and traces | `../outputs/model_comparison/` |
 | Time convention | `../outputs/time_mapping.csv` |
 | Legacy comparisons retained for audit | `../archive/legacy_snapshot.zip` |
 | Recalculation and figure generation | `../scripts/` |
 
-Final figures are supplied as 300-dpi PNG previews and vector PDFs in `../outputs/`. Use the PDF versions for typesetting. Saved legacy sensitivity runs remain in `../archive/legacy_snapshot.zip` and are clearly separated from corrected final outputs.
+Final figures are supplied as 300-dpi PNG previews and vector PDFs in `../outputs/`. Use the PDF versions for typesetting. Saved legacy sensitivity runs remain in `../archive/legacy_snapshot.zip` and are clearly separated from corrected final outputs. The midnight-availability rule is implemented centrally in `../src/q2_availability.py`.
 
 K-means uses random_state=0 and n_init=20. The probability-weighted throughput penalty matches the implementation coefficient $10^{-4}/12$ per scenario.
 
