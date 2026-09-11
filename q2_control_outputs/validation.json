@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "continuous_soc": true,
+  "no_emergency_charging": true,
+  "prefix_tests_passed": true,
+  "comparison_status": "exploratory; previously inspected year",
+  "time_convention": "144 chronological intervals; no official template export",
+  "terminal_policy": "planning cyclic at actual initial SOC; actual terminal SOC free",
+  "trace_columns": [
+    "grid",
+    "net",
+    "soc_start",
+    "soc_end",
+    "charge",
+    "discharge",
+    "emergency",
+    "spill"
+  ]
+}

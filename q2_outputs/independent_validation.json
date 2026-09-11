@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "best_model": "scenario_recent_12",
+  "leakage_max_difference": 0.0,
+  "perfect_information_lower_bound_yuan": 12245046.915277638,
+  "best_model_total_cost_yuan": 15152524.345208354,
+  "optimality_gap_vs_perfect_information_percent": 23.744110169991895,
+  "workbook_plan_cost_reconciliation_error_yuan": -2.088025212287903e-06,
+  "workbook_plan_rows": 334,
+  "workbook_battery_rows": 2004
+}
