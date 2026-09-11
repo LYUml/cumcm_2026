@@ -1,2 +1,0 @@
-terminal_floor_kwh,planning_penalty,scenario_mode,initial_soc_kwh,planned_yuan,emergency_yuan,total_yuan,emergency_kwh,min_soc,max_soc,final_soc,seconds
-3000.0,7.15,split,10800.0,13034310.492731867,717177.5577235287,13751488.050455395,116799.88770226254,1200.0,10800.0,3037.6349494444453,34.07427191600436
