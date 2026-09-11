@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "best": {
+    "terminal_floor_kwh": 3000.0,
+    "planning_penalty": 7.25,
+    "scenario_mode": "split",
+    "initial_soc_kwh": 10800.0,
+    "planned_yuan": 13040204.442367638,
+    "emergency_yuan": 711579.4082164487,
+    "total_yuan": 13751783.850584086,
+    "emergency_kwh": 115835.85351494211,
+    "min_soc": 1200.0,
+    "max_soc": 10800.0,
+    "final_soc": 3037.6349494444453,
+    "seconds": 35.30358549999073
+  },
+  "max_balance_residual_kwh": 1.1368683772161603e-13,
+  "max_soc_link_error_kwh": 0.0,
+  "simultaneous_charge_discharge": 0,
+  "emergency_while_charging": 0,
+  "information_rule": "day d scenarios use indices strictly less than d; execution uses current interval only",
+  "scope": "exploratory in-sample policy comparison on supplied historical year"
+}
