@@ -1,26 +1,17 @@
 """Create corrected comparison files, required-date tables, and paper figures."""
 from pathlib import Path
-import json
-import shutil
 import sys
 import numpy as np
 import pandas as pd
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'02_q2/src'))
-from plot_utils import setup_style, save_fig, PALETTE, COLORS, _lighten
-setup_style()
-import matplotlib.pyplot as plt
 
 OUT=ROOT/'02_q2/outputs'
-from q2_model import read_inputs
 dates=pd.to_datetime(pd.read_csv(OUT/'selected_daily.csv').date)
 daily=pd.read_csv(OUT/'selected_daily.csv'); natural=pd.read_csv(OUT/'natural_day_storage.csv')
 z=np.load(OUT/'selected_policy_numeric_trace.npz'); grid=z['grid']; trace=z['trace']
-_,load,pv,_=read_inputs(ROOT); net=load-pv
-old=pd.read_csv(ROOT/'02_q2/src/data/legacy_comparison_strict4h_fine.csv')
 models=pd.read_csv(OUT/'model_comparison/comparison.csv')
-v=json.loads((OUT/'validation.json').read_text())
 models.to_csv(OUT/'cost_comparison.csv',index=False,encoding='utf-8-sig')
 
 targets=['2025-03-20','2025-06-21','2025-09-23','2025-12-21']
@@ -50,8 +41,8 @@ pd.DataFrame(purchase).to_csv(OUT/'specified_dates_purchase.csv',index=False)
 pd.DataFrame(battery).to_csv(OUT/'specified_dates_storage.csv',index=False)
 pd.DataFrame(emergency,columns=['date','interval','emergency_kwh']).to_csv(OUT/'specified_dates_emergency.csv',index=False)
 
-from q2_cost_figures import make_cost_figures
+from figures.make_cost_figures import make_cost_figures
 make_cost_figures(OUT, ROOT/'02_q2/src/data/legacy_comparison_strict4h_fine.csv')
 
-from q2_example_figure import make_example_figure
+from figures.make_example_figure import make_example_figure
 make_example_figure(OUT, ROOT)

@@ -210,7 +210,7 @@ Emergency expenditure accounts for 5.26% of the total. This is the selected nona
 
 ### 6.2.3 Chronology correction
 
-![Chronology correction comparison](../outputs/q2_cost_chronology.png)
+![Chronology correction comparison](../outputs/figures/q2_cost_chronology.png)
 
 *Figure 1. Legacy and strictly causal realized expenditure for the selected four-hour-tree configuration. The correction affects both the state transition and the measurements available to forecasting at midnight; it does not change the tariff or reported units.*
 
@@ -218,7 +218,7 @@ The old run used the state after the 00:00–00:10 interval when preparing the p
 
 ### 6.2.4 Recomputed policy comparison and information constraints
 
-![Recomputed policy comparison](../outputs/q2_model_comparison.png)
+![Recomputed policy comparison](../outputs/figures/q2_model_comparison.png)
 
 | Policy | Day-ahead cost | Emergency cost | Total cost |
 |---|---:|---:|---:|
@@ -249,7 +249,7 @@ The causality suite perturbs (i) all rows from day $d$ onward, (ii) specifically
 
 ### 6.2.8 Representative daily operation
 
-![Representative daily purchasing and storage operation](../outputs/q2_representative_day_corrected.png)
+![Representative daily purchasing and storage operation](../outputs/figures/q2_representative_day_corrected.png)
 
 *Figure 3. Realized operation of the selected four-hour tree policy on the day whose total cost is closest to the median of the 334 daily costs; the earliest date breaks a tie. The panels show supply, signed battery action, and stored energy. The selection rule uses realized costs only to choose an illustration after simulation and does not influence purchase decisions.*
 

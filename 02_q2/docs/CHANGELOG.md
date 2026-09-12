@@ -2,14 +2,20 @@
 
 ## Cost-figure layout revision
 
-- Updated the median-cost example to a 6 × 4.65-inch three-panel layout, matching the cost-figure typography. All 144 interval values now use 145 explicit edges; the final next-day 00:00–00:10 interval is fully drawn. An annotation identifies the observed 20:40 lower-bound state and emergency episode ending at 22:10. Previous figures are backed up alongside the cost figures.
-- Example-only regeneration: `PYTHONDONTWRITEBYTECODE=1 python3 02_q2/src/q2_example_figure.py`.
+- Updated the median-cost example to a 6 × 4.65-inch three-panel layout, matching the cost-figure typography. All 144 interval values now use 145 explicit edges; the final next-day 00:00–00:10 interval is fully drawn. An annotation identifies the observed 20:40 lower-bound state and emergency episode ending at 22:10.
+- Example-only regeneration: `PYTHONDONTWRITEBYTECODE=1 python3 02_q2/scripts/figures/make_example_figure.py`.
 
 - Replaced correction-increment lollipops with signed horizontal bars; hatching identifies the total.
 - Reserved a right-aligned numeric column in the six-policy figure, moved legends above the data, and removed top/right borders.
 - Used 6-inch canvases and explicitly sized text for the Prism manuscript. Numeric labels are checked against rendered axes bounds before export.
-- Cost-only regeneration: `PYTHONDONTWRITEBYTECODE=1 python3 02_q2/src/q2_cost_figures.py`. The delivery pipeline calls the same module.
-- Previous PDF/PNG files are retained in `archive/figures_before_layout_fix/`. Numerical inputs and the representative-day figure are unchanged.
+- Cost-only regeneration: `PYTHONDONTWRITEBYTECODE=1 python3 02_q2/scripts/figures/make_cost_figures.py`. The delivery pipeline calls the same module.
+- Final PDF/PNG files now live only in `outputs/figures/`. The redundant pre-layout figure directory was moved to the macOS Trash during cleanup; the broader pre-cleanup state remains in `archive/legacy_snapshot.zip`.
+
+## Folder cleanup and modularization
+
+- Separated model code (`src/`), runnable pipelines (`scripts/`), figure generators (`scripts/figures/`), manuscript files (`paper/`), and generated figures (`outputs/figures/`).
+- Kept `paper/Q2_PRISM` as an extensionless Prism exchange text. It is intentionally not treated as a TeX source.
+- Removed generated caches and duplicate superseded figure files while retaining `archive/legacy_snapshot.zip` for recovery.
 
 ## What changed
 

@@ -5,9 +5,13 @@ Data roles retain the project palette and light fill / original edge pairing.
 """
 from pathlib import Path
 import json
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+Q2 = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(Q2/'src'))
 from plot_utils import setup_style, save_fig, PALETTE, COLORS, _lighten
 
 
@@ -37,6 +41,8 @@ def _save_checked(fig, axes, out, name):
 
 def make_cost_figures(out: Path, legacy_path: Path):
     setup_style()
+    figure_out = out/'figures'
+    figure_out.mkdir(parents=True, exist_ok=True)
     # Explicit sizing prevents inherited large theme fonts squeezing the axes.
     with plt.rc_context({'font.family': 'DejaVu Serif', 'font.size': 9,
                          'axes.labelsize': 9, 'legend.fontsize': 8.5,
@@ -75,7 +81,7 @@ def make_cost_figures(out: Path, legacy_path: Path):
               xlabel='Correction increment (thousand CNY)')
         _axes(b)
         b.axvline(0, color=COLORS['ref_line'], linewidth=.9)
-        _save_checked(fig, [a,b], out, 'q2_cost_chronology')
+        _save_checked(fig, [a,b], figure_out, 'q2_cost_chronology')
 
         models = pd.read_csv(out/'model_comparison/comparison.csv').sort_values('total_yuan')
         fig,a = plt.subplots(figsize=(6,3.65))
@@ -97,9 +103,9 @@ def make_cost_figures(out: Path, legacy_path: Path):
             a.get_yticklabels()[k].set_fontweight(weight)
             a.text(17.65,k,f'{row.total_yuan/1e6:.3f}',ha='right',va='center',
                    fontsize=9,fontweight=weight,color=COLORS['text'])
-        _save_checked(fig,[a],out,'q2_model_comparison')
+        _save_checked(fig,[a],figure_out,'q2_model_comparison')
 
 
 if __name__ == '__main__':
-    q2=Path(__file__).resolve().parents[1]
+    q2=Path(__file__).resolve().parents[2]
     make_cost_figures(q2/'outputs',q2/'src/data/legacy_comparison_strict4h_fine.csv')

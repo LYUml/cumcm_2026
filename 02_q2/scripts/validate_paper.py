@@ -45,9 +45,9 @@ def main() -> None:
     for value in comparison["total_yuan"] / 1e6:
         assert f"{value:.4f}" in text, f"paper is missing comparison total {value:.4f}"
 
-    for rel in ("../outputs/q2_cost_chronology.png",
-                "../outputs/q2_model_comparison.png",
-                "../outputs/q2_representative_day_corrected.png"):
+    for rel in ("../outputs/figures/q2_cost_chronology.png",
+                "../outputs/figures/q2_model_comparison.png",
+                "../outputs/figures/q2_representative_day_corrected.png"):
         assert rel in text and (PAPER.parent / rel).resolve().exists(), rel
 
     forbidden = ["13,168,516.81", "617,373.55", "13,785,890.36",

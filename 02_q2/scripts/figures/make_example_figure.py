@@ -4,15 +4,21 @@
 use 145 edges for all 144 values, including the final next-day ten minutes.
 """
 from pathlib import Path
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+Q2 = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(Q2/'src'))
 from plot_utils import setup_style, save_fig, PALETTE, COLORS, _lighten
 from q2_model import read_inputs
 
 
 def make_example_figure(out, root):
     setup_style()
+    figure_out = out/'figures'
+    figure_out.mkdir(parents=True, exist_ok=True)
     daily = pd.read_csv(out/'selected_daily.csv')
     i = int((daily.total_yuan-daily.total_yuan.median()).abs().idxmin())
     with np.load(out/'selected_policy_numeric_trace.npz') as data:
@@ -85,9 +91,9 @@ def make_example_figure(out, root):
                     bb=text.get_window_extent(renderer)
                     assert bb.x0>=0 and bb.y0>=0 and bb.x1<=fig.bbox.x1 and bb.y1<=fig.bbox.y1
         for ext in ('pdf','png'):
-            save_fig(fig,out/f'q2_representative_day_corrected.{ext}')
+            save_fig(fig,figure_out/f'q2_representative_day_corrected.{ext}')
 
 
 if __name__=='__main__':
-    root=Path(__file__).resolve().parents[2]
+    root=Path(__file__).resolve().parents[3]
     make_example_figure(root/'02_q2/outputs',root)

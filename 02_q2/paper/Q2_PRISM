@@ -718,7 +718,7 @@ The four-hour tree has the lowest realized expenditure among these six evaluated
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.96\textwidth]{q2_model_comparison.pdf}
+\includegraphics[width=0.96\textwidth]{../outputs/figures/q2_model_comparison.pdf}
 \captionsetup{font=small}
 \caption{Scheduled, emergency, and total expenditures of the six policies, ordered by increasing realized total expenditure as in Tables~\ref{tab:q2-policy-definitions} and~\ref{tab:q2-full-comparison}. All policies share the evaluation dates, initial state, information boundary, feedback controller, and settlement tariff; their forecasting and planning structures differ.}
 \label{fig:q2-model-comparison}
@@ -834,7 +834,7 @@ Figure~\ref{fig:q2-representative-day} shows the purchase row dated May 1, 2025.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.96\textwidth]{q2_representative_day_corrected.pdf}
+\includegraphics[width=0.96\textwidth]{../outputs/figures/q2_representative_day_corrected.pdf}
 \captionsetup{font=small}
 \caption{Operation of the purchase row dated May 1, 2025, covering 00:10 through 00:10 on the following date. The aligned panels show supply and demand, signed battery action, and stored energy with its physical limits. Emergency supply is additional to committed purchases. The example is selected by proximity to the median purchase-row cost, not as a stress test.}
 \label{fig:q2-representative-day}
@@ -987,7 +987,7 @@ The selected run incurs CNY 107,318.96 more than the original implementation, an
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.96\textwidth]{q2_cost_chronology.pdf}
+\includegraphics[width=0.96\textwidth]{../outputs/figures/q2_cost_chronology.pdf}
 \captionsetup{font=small}
 \caption{Effect of enforcing midnight information availability for the selected four-hour tree. Absolute cost composition and the increment relative to the original run are shown separately. The correction affects both the decision-state timing and the observations admitted to forecasting; tariffs are unchanged.}
 \label{fig:q2-chronology}
