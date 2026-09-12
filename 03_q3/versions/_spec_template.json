@@ -1,0 +1,18 @@
+{
+  "_comment": "抄一份改。parent 填要比的上一版。results 在全年跑完后从 outputs/summary.json 和 subset_comparison.csv 填。",
+  "id": "v00x",
+  "slug": "short_english_name",
+  "title": "一句话：这一版相对上一版改了什么",
+  "status": "trial",
+  "parent": "v000",
+  "changed_from_parent": [
+    "只写真正改动的条目，例如：日内残差分位 0.70 → 0.80"
+  ],
+  "unchanged": "未列出的假设、参数、滚动切块、电池规则一律继承 parent。",
+  "parameters_override": {},
+  "results": {
+    "total_cost_yuan": null,
+    "static_00_only_yuan": null,
+    "selected_updates": null
+  }
+}

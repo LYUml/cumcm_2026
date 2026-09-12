@@ -1,0 +1,137 @@
+{
+  "id": "v002",
+  "slug": "free_battery_rest_greedy",
+  "title": "解开三把电池锁：跨夜 SOC + 当天剩余时域重排 + 实时贪心充放",
+  "status": "champion",
+  "parent": "v001",
+  "kept_reason": "相对 v001 总费用降低 917,232.98 元（6.35%）。紧急购电从 21.9 万度降到 1.16 万度。预报与缓冲沿用 v001。",
+  "created": "2026-09-12",
+  "recorded": "2026-09-12",
+  "code": "Q3_new/run_free_battery.py；最优再导出 Q3_new/export_best_free_battery.py",
+  "search": {
+    "script": "Q3_new/run_free_battery.py",
+    "n_policies": 36,
+    "horizon": ["rest_of_day", "block"],
+    "recourse": ["greedy", "planned"],
+    "terminal_value_yuan_per_kwh": [
+      0.0,
+      0.1915,
+      0.2245,
+      0.3831,
+      0.4489,
+      0.5746,
+      0.6976,
+      0.7662,
+      0.9577
+    ],
+    "elapsed_s": 240.09,
+    "winner": {
+      "horizon": "rest_of_day",
+      "recourse": "greedy",
+      "terminal_value": 0.44891944444444437,
+      "terminal_value_meaning": "night (0:00–6:00) mean tariff, 元/kWh, applied to remaining-horizon end SOC"
+    }
+  },
+  "changed_from_parent": [
+    "取消每天 0:00 和 24:00 必须 6000 kWh；SOC 跨夜连续，评定期从 1 月中旬 6000 滚到 12-31",
+    "取消 6 小时窗末 SOC 钉回 0 点计划",
+    "0/6/12/18 点线性规划覆盖当天剩余全部时段，不再只看接下来约 6 小时",
+    "合同锁死后，每个 10 分钟按真实净负荷贪心充放：缺口先放电，盈余先充电；放/充不下才紧急购电或弃电",
+    "规划器给剩余时域末了的 SOC 一个终端价值（最优取谷电均价 0.4489 元/度），避免半夜无意义清空或无意义囤满"
+  ],
+  "unchanged": "计费公式、负荷/光伏点预报、v001 四分位缓冲 0.75/0.85/0.85/0.80、购电合同只在 0/6/12/18 改、三次更新都开。",
+  "billing": {
+    "rule": "take_at_p_cancel_at_0.5p_extra_at_1.5p"
+  },
+  "parameters": {
+    "buffer": {
+      "plan_residual_quantile": 0.75,
+      "adjustment_residual_quantile_by_hour": {
+        "6": 0.85,
+        "12": 0.85,
+        "18": 0.8
+      },
+      "residual_window_days": 30,
+      "smooth": "7-point centered rolling median"
+    },
+    "rolling": {
+      "selected_updates": [6, 12, 18],
+      "purchase_horizon": "rest_of_day",
+      "battery_recourse": "greedy_on_actual_net",
+      "terminal_soc_value_yuan_per_kwh": 0.44891944444444437
+    },
+    "battery": {
+      "capacity_kwh": 12000,
+      "soc_min_kwh": 1200,
+      "soc_max_kwh": 10800,
+      "soc_anchor_kwh": null,
+      "power_kw": 5000,
+      "interval_limit_kwh": 833.333333,
+      "charge_efficiency": 0.9,
+      "discharge_efficiency": 0.9
+    }
+  },
+  "results": {
+    "total_cost_yuan": 13521409.707452236,
+    "plan_cost_yuan": 13186919.25679596,
+    "adjustment_cost_yuan": 271544.7606689939,
+    "emergency_cost_yuan": 62945.68998728275,
+    "plan_kwh": 21500147.87287376,
+    "final_kwh": 21032762.59514883,
+    "upward_kwh": 501515.09585990454,
+    "downward_kwh": 968900.3735848318,
+    "emergency_kwh": 11602.854539463442,
+    "spill_kwh": 1888927.5314945108,
+    "charge_kwh": 6404289.431332465,
+    "discharge_kwh": 5188041.008105343,
+    "mean_soc_kwh": 6926.063571432714,
+    "mean_soc_open_kwh": 2674.3702464117428,
+    "mean_soc_close_kwh": 2672.485453577257,
+    "selected_updates": "06:00 + 12:00 + 18:00",
+    "delta_vs_parent_yuan": -917232.9756919872,
+    "saving_vs_parent_pct": 6.352486,
+    "paper_days": {
+      "2025-03-20": {
+        "soc_open": 2740.68,
+        "soc_close": 2407.26,
+        "plan_kwh": 70012.36,
+        "final_kwh": 67053.25,
+        "charge_kwh": 21277.40,
+        "discharge_kwh": 17534.77,
+        "emergency_kwh": 0.0,
+        "total_yuan": 42708.90
+      },
+      "2025-06-21": {
+        "soc_open": 3145.29,
+        "soc_close": 3762.35,
+        "plan_kwh": 35951.98,
+        "final_kwh": 35615.85,
+        "charge_kwh": 12805.81,
+        "discharge_kwh": 9817.36,
+        "emergency_kwh": 0.0,
+        "total_yuan": 21143.99
+      },
+      "2025-09-23": {
+        "soc_open": 2261.74,
+        "soc_close": 2199.38,
+        "plan_kwh": 69538.75,
+        "final_kwh": 67490.15,
+        "charge_kwh": 21184.31,
+        "discharge_kwh": 17215.42,
+        "emergency_kwh": 6.375,
+        "total_yuan": 44129.12
+      },
+      "2025-12-21": {
+        "soc_open": 2855.72,
+        "soc_close": 2490.87,
+        "plan_kwh": 98077.65,
+        "final_kwh": 96781.02,
+        "charge_kwh": 24218.05,
+        "discharge_kwh": 19945.00,
+        "emergency_kwh": 0.0,
+        "total_yuan": 63249.67
+      }
+    }
+  },
+  "note": "36 组里，真正拉开差距的是实时贪心 vs 跟计划走。规划看整天还是只看 6 小时，在贪心打开后只差约 2.6 万。午夜 SOC 不再是 6000：评定期早上平均约 2674 kWh，中位 2493，从未超过 5215。"
+}

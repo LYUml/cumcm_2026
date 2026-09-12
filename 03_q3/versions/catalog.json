@@ -1,0 +1,113 @@
+{
+  "champion": "v002",
+  "versions": [
+    {
+      "id": "v000",
+      "slug": "corrected_billing_teammate",
+      "title": "计费改正，组员其余原样",
+      "status": "kept",
+      "parent": null,
+      "folder": "v000_corrected_billing_teammate",
+      "total_cost_yuan": 14669597.26287158,
+      "delta_vs_parent_yuan": null,
+      "selected_updates": "06:00 + 12:00",
+      "recorded": "2026-09-12",
+      "copied_files": [
+        "result3.xlsx",
+        "summary.json",
+        "subset_comparison.csv",
+        "monthly_cost.csv",
+        "monthly_cost.png",
+        "table1.csv",
+        "table2_charge.csv",
+        "table2_discharge.csv",
+        "table2_soc.csv",
+        "table3_emergency.csv",
+        "forecast_quality.csv",
+        "block_forecast_mae.csv",
+        "sample_2025-06-21.png"
+      ]
+    },
+    {
+      "id": "v001",
+      "slug": "four_quantile_grid_best",
+      "title": "四次缓冲独立网格最优：0.75 / 0.85 / 0.85 / 0.80，三次都开",
+      "status": "kept",
+      "parent": "v000",
+      "folder": "v001_four_quantile_grid_best",
+      "total_cost_yuan": 14438642.683144223,
+      "delta_vs_parent_yuan": -230954.57972735725,
+      "selected_updates": "06:00 + 12:00 + 18:00",
+      "recorded": "2026-09-12",
+      "copied_files": [
+        "result3.xlsx",
+        "summary.json",
+        "subset_comparison.csv",
+        "monthly_cost.csv",
+        "monthly_cost.png",
+        "table1.csv",
+        "table2_charge.csv",
+        "table2_discharge.csv",
+        "table2_soc.csv",
+        "table3_emergency.csv",
+        "forecast_quality.csv",
+        "block_forecast_mae.csv",
+        "sample_2025-06-21.png"
+      ]
+    },
+    {
+      "id": "v002",
+      "slug": "free_battery_rest_greedy",
+      "title": "解开三把电池锁：跨夜 SOC + 当天剩余时域重排 + 实时贪心充放",
+      "status": "champion",
+      "parent": "v001",
+      "folder": "v002_free_battery_rest_greedy",
+      "total_cost_yuan": 13521409.707452236,
+      "delta_vs_parent_yuan": -917232.9756919872,
+      "selected_updates": "06:00 + 12:00 + 18:00",
+      "recorded": "2026-09-12",
+      "copied_files": [
+        "result3.xlsx",
+        "summary.json",
+        "subset_comparison.csv",
+        "monthly_cost.csv",
+        "monthly_cost.png",
+        "table1.csv",
+        "table2_charge.csv",
+        "table2_discharge.csv",
+        "table2_soc.csv",
+        "table3_emergency.csv",
+        "forecast_quality.csv",
+        "block_forecast_mae.csv",
+        "sample_2025-06-21.png"
+      ]
+    },
+    {
+      "id": "v003",
+      "slug": "evening_valley_charge_grid",
+      "title": "晚间最低价时段向午夜目标充电（相对 v002 的全量扫描）",
+      "status": "discarded",
+      "parent": "v002",
+      "folder": "v003_evening_valley_charge_grid",
+      "total_cost_yuan": 13524284.684543584,
+      "delta_vs_parent_yuan": 2874.9770913477987,
+      "selected_updates": "06:00 + 12:00 + 18:00",
+      "recorded": "2026-09-12",
+      "copied_files": [
+        "result3.xlsx",
+        "summary.json",
+        "subset_comparison.csv",
+        "monthly_cost.csv",
+        "monthly_cost.png",
+        "table1.csv",
+        "table2_charge.csv",
+        "table2_discharge.csv",
+        "table2_soc.csv",
+        "table3_emergency.csv",
+        "forecast_quality.csv",
+        "block_forecast_mae.csv",
+        "sample_2025-06-21.png"
+      ]
+    }
+  ]
+}

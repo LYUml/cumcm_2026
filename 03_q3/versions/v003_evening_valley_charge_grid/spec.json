@@ -1,0 +1,48 @@
+{
+  "id": "v003",
+  "slug": "evening_valley_charge_grid",
+  "title": "晚间最低价时段向午夜目标充电（相对 v002 的全量扫描）",
+  "status": "discarded",
+  "parent": "v002",
+  "kept_reason": "107 组全部没有低于 v002。最近的一组（按历史猜次日上午净负荷的 30%、午夜目标约 4018 kWh）仍贵 2,874.98 元。正式最优仍是 v002。",
+  "created": "2026-09-12",
+  "recorded": "2026-09-12",
+  "code": "Q3_new/run_evening_charge.py",
+  "search": {
+    "n_policies": 107,
+    "elapsed_s": 864.34,
+    "beats_v002": false,
+    "grid_best_name": "v002_baseline",
+    "closest_new_policy": "hist_morning_c0.3_n37_soft",
+    "closest_new_cost_yuan": 13524284.684543584,
+    "note_on_baseline_replica": "网格里的 v002 复现用了 PRICE[:35] 的谷电均价 0.4357，原 v002 是 PRICE[:36] 的 0.4489，复现贵 163.70 元，属终端价值窗口差 1 格，不影响「加充更贵」的排序。"
+  },
+  "changed_from_parent": [
+    "18:00 到当天结束的 37 格里，按电价挑最便宜的 N 格，允许规划器在这些格里为午夜目标加充",
+    "午夜 SOC 目标：固定 kWh，或按次日用电预测 × 覆盖比例",
+    "目标可以软约束（缺 1 度罚 1 元）或硬约束（结束电量 ≥ 目标）"
+  ],
+  "unchanged": "计费、v001 缓冲、0/6/12/18 改合同、剩余当天规划、锁死后贪心、电量从 1 月 15 日 6000 滚、终端价值仍按谷电均价。",
+  "new_parameters": {
+    "evening_window": "18:00 到当天最后一格（37 格；最后一格标签是次日 0:00-0:10）",
+    "n_cheapest": "这 37 格里只允许最便宜的 N 格规划充电；N=12/24/37。N=12 基本就是 22:00 以后的谷段",
+    "target_mode": "off=不加目标（对照）；fixed=午夜固定电量；forecast=按次日需电量推目标",
+    "fixed_kwh": "3000/4000/5000/6000/7500，只在 target_mode=fixed 时用",
+    "need_kind": "hist_morning=过去同星期几次日 6:00-12:00 正净负荷；hist_expensive=次日电价高于全天均价的正净负荷；hybrid_morning=负荷用历史、光伏用当天 18 点 24 小时预报",
+    "cover_ratio": "预测需电量里预先存进电池的比例 0.3/0.5/0.8/1.0，再除以 0.9 放电效率，从 1200 往上加，封顶 10800",
+    "enforce": "soft=达不到目标按 1 元/度罚款；ge=必须 ≥ 目标，不可解则退回 soft",
+    "anchor": "h0_and_h18=0/6/12/18 的剩余时域规划都带着午夜目标；h18_only=只在 18 点加目标（多买按 1.5 倍）",
+    "shortfall_penalty": 1.0
+  },
+  "results": {
+    "total_cost_yuan": 13524284.684543584,
+    "delta_vs_parent_yuan": 2874.9770913477987,
+    "selected_updates": "06:00 + 12:00 + 18:00",
+    "closest_policy": {
+      "name": "hist_morning_c0.3_n37_soft",
+      "mean_soc_open_kwh": 4765.68,
+      "mean_midnight_target_kwh": 4018.06
+    }
+  },
+  "note": "v002 已经会在 22:00-24:00 用谷电补一点电。再人为把午夜目标抬到 3000+，等于多买谷电囤到早上，囤电的代价大于早上少买高峰电的好处。"
+}

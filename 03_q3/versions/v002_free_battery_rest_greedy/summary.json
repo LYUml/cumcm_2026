@@ -1,0 +1,38 @@
+{
+  "parent": "v001",
+  "v001_cost_yuan": 14438642.683144223,
+  "best": {
+    "horizon": "rest_of_day",
+    "recourse": "greedy",
+    "terminal_value": 0.44891944444444437,
+    "total_cost": 13521409.707452236,
+    "plan_cost": 13186919.25679596,
+    "adjustment_cost": 271544.7606689939,
+    "emergency_cost": 62945.68998728275,
+    "plan_kwh": 21500147.87287376,
+    "final_kwh": 21032762.59514883,
+    "upward_kwh": 501515.09585990454,
+    "downward_kwh": 968900.3735848318,
+    "emergency_kwh": 11602.854539463442,
+    "spill_kwh": 1888927.5314945108,
+    "mean_soc": 6926.063571432714,
+    "min_soc": 1200.0,
+    "max_soc": 10800.0,
+    "mean_soc_open": 2674.3702464117428,
+    "mean_soc_close": 2672.485453577257,
+    "charge_kwh": 6404289.431332465,
+    "discharge_kwh": 5188041.008105343,
+    "delta_vs_v001": -917232.9756919872
+  },
+  "elapsed_s": 240.09147712501,
+  "n_policies": 36,
+  "quantiles": {
+    "q00": 0.75,
+    "q_adj": {
+      "6": 0.85,
+      "12": 0.85,
+      "18": 0.8
+    }
+  },
+  "note": "Purchase still updates only at 0/6/12/18. Battery SOC carries overnight; issue-time LP covers remaining day or next block with no SOC pin; intra-block battery is greedy on actual or follows the LP schedule."
+}
