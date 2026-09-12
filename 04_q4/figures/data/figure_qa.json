@@ -1,0 +1,61 @@
+{
+  "scope": "Six Q4 figures; not a compiled whole-paper layout review",
+  "figures": {
+    "fig_q4_f1": {
+      "text_inside_canvas": true,
+      "size_inches": [
+        6.0,
+        2.65
+      ],
+      "pdf_png_present": true
+    },
+    "fig_q4_f2": {
+      "text_inside_canvas": true,
+      "size_inches": [
+        6.0,
+        3.8
+      ],
+      "pdf_png_present": true
+    },
+    "fig_q4_f3": {
+      "text_inside_canvas": true,
+      "size_inches": [
+        6.0,
+        4.78
+      ],
+      "pdf_png_present": true
+    },
+    "fig_q4_f4": {
+      "text_inside_canvas": true,
+      "size_inches": [
+        6.0,
+        4.78
+      ],
+      "pdf_png_present": true
+    },
+    "fig_q4_f5": {
+      "text_inside_canvas": true,
+      "size_inches": [
+        6.0,
+        3.65
+      ],
+      "pdf_png_present": true
+    },
+    "fig_q4_f6": {
+      "text_inside_canvas": true,
+      "size_inches": [
+        6.0,
+        3.7
+      ],
+      "pdf_png_present": true
+    }
+  },
+  "sources": {
+    "outputs/q4_2_comparison/policy_weekday_mean_4w.npz": "9ac03941e870935764c356bf935490e6d1954094c98e339943d863c81421d66f",
+    "outputs/q4_3_stochastic/policy.npz": "93e5fb85a2687a3dd3012de6bdb3a8f95ab9507ee304837d4cbb069d3a9acf60",
+    "figures/data/representative_day.npz": "fdb5ece2ac5df7c00036f5e8322547aefcec1bc36bad89104acdf48dfc3d6492",
+    "figures/data/monthly_comparison.csv": "f722c27403eda54f87a5f4cfc2f8fa15b11d9239215514ba5c5115cffe61b60d"
+  },
+  "monthly_totals_match_original_results": true,
+  "visual_review": "All six PNGs viewed individually; fixed F5 long category label; unified stair rendering in F4. No figure overlap or clipping observed in final review."
+}

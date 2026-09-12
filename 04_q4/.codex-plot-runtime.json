@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "profile": "modeling-competition",
+  "capability": "all",
+  "workspace": "/Users/lml/Desktop/cumcm_2026/04_q4",
+  "runtime_skill": "/Users/lml/.codex/skills/vivid-figures-skill/original/resources",
+  "paths": {
+    "python": "/opt/homebrew/Caskroom/miniforge/base/bin/python3.13",
+    "managed_python": null,
+    "chrome": null,
+    "drawio": null,
+    "mmdc": null,
+    "node": "/opt/homebrew/Cellar/node@24/24.19.0/bin/node",
+    "xelatex": "/usr/local/texlive/2024/bin/universal-darwin/xetex",
+    "bash": "/bin/bash",
+    "capture_electron": null,
+    "capture_js": null,
+    "shared_scripts": "/Users/lml/Desktop/cumcm_2026/04_q4/skills/shared-scripts",
+    "utils": "/Users/lml/Desktop/cumcm_2026/04_q4/_utils",
+    "templates": "/Users/lml/Desktop/cumcm_2026/04_q4/_templates",
+    "tools": "/Users/lml/Desktop/cumcm_2026/04_q4/tools"
+  },
+  "injection": {
+    "shared": {
+      "copied": 127,
+      "preserved": 0
+    },
+    "utils": {
+      "copied": 127,
+      "preserved": 0
+    },
+    "templates": {
+      "copied": 7,
+      "preserved": 0
+    },
+    "tools": {
+      "copied": 3,
+      "preserved": 0
+    }
+  },
+  "prompt_policy": "vendored drawing prompts are immutable"
+}

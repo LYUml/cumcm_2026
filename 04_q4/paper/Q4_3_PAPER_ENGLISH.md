@@ -1,18 +1,36 @@
 # Problem 4-3: Rolling Joint-Scenario Purchasing under Fluctuating Prices
 
-> Revised formal version. This section extends Model 4-2 directly and does not
-> inherit the independent deterministic implementation in `03_q3`.
+> Revised formal version after the Q3 scenario update. Model 4-3 combines Q3's
+> rolling residual-scenario contract mechanism with Q4-2's paired price
+> uncertainty model.
 
 ## 9.1 Logical connection with Model 4-2
 
-Model 4-2 makes one purchase commitment at 00:00 under joint net-load and price
-uncertainty. Problem 4-3 retains this uncertainty representation and physical
-controller, but admits new photovoltaic forecasts at 06:00, 12:00 and 18:00.
-The natural extension is therefore a rolling multistage controller: construct
-twelve paired net-load--price paths, solve the remaining-horizon scenario-tree
-LP, execute only the block before the next release, then observe the realised
-system and repeat. Model 4-2 is the root problem and Model 4-3 is its
-receding-horizon extension [3,4].
+The revised Model 3 first transfers Model 2's twelve historical net-load
+residual paths into the 00:00/06:00/12:00/18:00 rolling contract. Model 4-2
+then augments the same residual-path idea with causal fluctuating-price
+forecasts and paired net-load--price scenarios. Model 4-3 is therefore the
+intersection of the two preceding developments: it retains Model 3's rolling
+information and adjustment settlement, while adding Model 4-2's price process
+and paired uncertainty representation.
+
+At every release, the controller constructs twelve paired paths, solves the
+remaining-horizon program, executes only the block before the next release,
+then observes the realised system and repeats. Thus the progression is
+
+$$
+\text{Model 2: net-load scenarios}
+\rightarrow
+\begin{cases}
+\text{Model 3: rolling contract updates},\\
+\text{Model 4-2: paired price uncertainty},
+\end{cases}
+\rightarrow
+\text{Model 4-3: rolling paired scenarios}.
+$$
+
+This is a receding-horizon stochastic-control construction [3,4], rather than
+an unrelated replacement of the Model 3 method.
 
 ## 9.2 Information sets and paired residual scenarios
 
@@ -68,10 +86,17 @@ $$\min\ \sum_t\bar p_t(1.5u^k_t-0.5v^k_t)
 +4.5\sum_s\pi_s\sum_t p^{(s)}_tE^{(s)}_t
 +\varepsilon\sum_s\pi_s\sum_t(C^{(s)}_t+D^{(s)}_t).\tag{9.9}$$
 
-The constant baseline cost is omitted from (9.9). A binary scenario tree is
-rebuilt in four-hour stages. Battery actions are equal for scenarios in the
-same active node, preventing anticipatory response; purchase is common to all
-scenarios because it is committed at the current issue time.
+The constant baseline cost is omitted from (9.9). Purchase is common to all
+scenarios because it is committed at the current issue time. The revised Q3
+experiments compared two recourse structures: the faithful four-hour Q2 tree
+and a two-stage relaxation in which scenario battery paths separate
+immediately. The latter achieved the lowest fixed-price backtest cost, whereas
+the former enforces the stricter information chronology. Because Q4-3 contains
+an additional uncertain price process, the formal policy uses the conservative
+four-hour nonanticipative tree: battery actions are equal for scenarios in the
+same active node and cannot respond to an unobserved path. The two-stage Q3
+winner is retained as a computational ablation, not silently described as the
+same tree.
 
 ## 9.4 Execution and settlement
 
@@ -125,8 +150,10 @@ settlement are held fixed; only enabled update times change.
 Every release lowers both expenditure and emergency energy. All three updates
 save 574,807.13 CNY (3.905%) and reduce emergency energy by 90.44% relative to
 the 00:00-only policy. Hence all three additional forecasts should be used.
-This conclusion comes from an ablation within one fixed Q4-2-derived stochastic
-controller, rather than from switching between unrelated Q3 and Q4 models.
+This conclusion comes from an ablation within one fixed rolling paired-scenario
+controller. It extends the revised Q3 information structure and settlement
+rules while using the stricter Q4-2 tree for joint net-load and price
+uncertainty.
 
 ## References added for Model 4-3
 
@@ -147,3 +174,5 @@ Control and Stochastic Dual Dynamic Programming approaches,” arXiv:2205.07700,
 | Full-year results and update ablation | `../outputs/q4_3_stochastic/` |
 | Official workbook | `../outputs/q4_3_stochastic/result4-3.xlsx` |
 | Parent Q4-2 model | `../scripts/run_q4_2_comparison.py` |
+| Revised Q3 scenario comparison | `../../03_q3/scripts/run_scenario_tree.py` |
+| Revised Q3 champion specification | `../../03_q3/versions/v007_q2_scenario_recourse_twostage/spec.json` |

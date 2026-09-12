@@ -1,5 +1,9 @@
 # Question 4 workspace
 
+The integrated English source for the final writing pass is
+`04_q4/paper/q4_paper_english.md`. It combines Q4-2 and Q4-3 and contains
+unrendered figure placeholders with plotting data and chart specifications.
+
 Q4-2 reruns the authoritative Q2 policy under uncertain, time-varying prices.
 Q4-3 then combines the selected causal price model with the Q3 rolling
 PV/purchase controller. In both cases forecasts affect decisions, while final
