@@ -1,0 +1,113 @@
+{
+  "id": "v001",
+  "slug": "four_quantile_grid_best",
+  "title": "四次缓冲独立网格最优：0.75 / 0.85 / 0.85 / 0.80，三次都开",
+  "status": "champion",
+  "parent": "v000",
+  "kept_reason": "相对 v000 总费用降低 230,954.58 元。只改四个发布时间的残差分位，其余继承 v000。",
+  "created": "2026-09-12",
+  "recorded": "2026-09-12",
+  "code": "Q3_new/run_corrected.py --plan-q 0.75 --adj-q 0.85,0.85,0.80",
+  "search": {
+    "grid": [
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8,
+      0.85,
+      0.9,
+      0.95
+    ],
+    "independent_times": [
+      "00:00",
+      "06:00",
+      "12:00",
+      "18:00"
+    ],
+    "n_quantile_tuples": 10000,
+    "also_enumerated_update_subsets": 8,
+    "elapsed_s": 373.0,
+    "script": "Q3_new/sweep_four_quantiles.py"
+  },
+  "changed_from_parent": [
+    "00:00 残差分位 0.80 → 0.75",
+    "06:00 残差分位 0.70 → 0.85（三次调整不再共用同一个分位）",
+    "12:00 残差分位 0.70 → 0.85",
+    "18:00 残差分位 从不用 → 0.80，并且打开 18 点更新",
+    "最优更新组合 6+12 → 6+12+18"
+  ],
+  "unchanged": "计费、负荷/光伏点预报、30 天残差窗口、7 点中位数平滑、每天 SOC 6000、一次只改接下来约 6 小时、窗末电量钉回 0 点计划、真实时电池跟计划走。",
+  "billing": {
+    "rule": "take_at_p_cancel_at_0.5p_extra_at_1.5p"
+  },
+  "parameters": {
+    "buffer": {
+      "plan_residual_quantile": 0.75,
+      "adjustment_residual_quantile_by_hour": {
+        "6": 0.85,
+        "12": 0.85,
+        "18": 0.8
+      },
+      "residual_window_days": 30,
+      "smooth": "7-point centered rolling median"
+    },
+    "rolling": {
+      "selected_updates": [
+        6,
+        12,
+        18
+      ]
+    }
+  },
+  "results": {
+    "total_cost_yuan": 14438642.683144223,
+    "static_00_only_yuan": 15059525.550537635,
+    "saving_vs_static_yuan": 620882.8673934117,
+    "saving_vs_static_pct": 4.122858089451867,
+    "plan_cost_yuan": 13301863.247348014,
+    "adjustment_cost_yuan": 362935.0919755037,
+    "emergency_cost_yuan": 773844.343820708,
+    "plan_kwh": 21792791.769315634,
+    "final_kwh": 21627471.563139588,
+    "upward_kwh": 581105.3724950354,
+    "downward_kwh": 746425.5786710834,
+    "emergency_kwh": 219388.89526462398,
+    "spill_kwh": 2599335.0949888052,
+    "selected_updates": "06:00 + 12:00 + 18:00",
+    "delta_vs_parent_yuan": -230954.57972735353,
+    "paper_days": {
+      "2025-03-20": {
+        "plan_kwh": 70890.89,
+        "final_kwh": 67599.58,
+        "adjustment_yuan": 405.55,
+        "emergency_kwh": 1287.41,
+        "total_yuan": 48171.72
+      },
+      "2025-06-21": {
+        "plan_kwh": 37817.84,
+        "final_kwh": 39124.56,
+        "adjustment_yuan": 1291.64,
+        "emergency_kwh": 101.86,
+        "total_yuan": 23677.39
+      },
+      "2025-09-23": {
+        "plan_kwh": 69885.12,
+        "final_kwh": 69057.37,
+        "adjustment_yuan": 1094.77,
+        "emergency_kwh": 803.64,
+        "total_yuan": 47273.36
+      },
+      "2025-12-21": {
+        "plan_kwh": 99084.01,
+        "final_kwh": 97451.85,
+        "adjustment_yuan": -220.54,
+        "emergency_kwh": 780.0,
+        "total_yuan": 65864.8
+      }
+    }
+  },
+  "note": "前 10 名费用非常接近（约 14.439–14.452 万）。最优不是唯一尖峰。6 月滚动现在低于只信 0 点。"
+}

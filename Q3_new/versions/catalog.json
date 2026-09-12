@@ -1,0 +1,59 @@
+{
+  "champion": "v001",
+  "versions": [
+    {
+      "id": "v000",
+      "slug": "corrected_billing_teammate",
+      "title": "计费改正，组员其余原样",
+      "status": "kept",
+      "parent": null,
+      "folder": "v000_corrected_billing_teammate",
+      "total_cost_yuan": 14669597.26287158,
+      "delta_vs_parent_yuan": null,
+      "selected_updates": "06:00 + 12:00",
+      "recorded": "2026-09-12",
+      "copied_files": [
+        "result3.xlsx",
+        "summary.json",
+        "subset_comparison.csv",
+        "monthly_cost.csv",
+        "monthly_cost.png",
+        "table1.csv",
+        "table2_charge.csv",
+        "table2_discharge.csv",
+        "table2_soc.csv",
+        "table3_emergency.csv",
+        "forecast_quality.csv",
+        "block_forecast_mae.csv",
+        "sample_2025-06-21.png"
+      ]
+    },
+    {
+      "id": "v001",
+      "slug": "four_quantile_grid_best",
+      "title": "四次缓冲独立网格最优：0.75 / 0.85 / 0.85 / 0.80，三次都开",
+      "status": "champion",
+      "parent": "v000",
+      "folder": "v001_four_quantile_grid_best",
+      "total_cost_yuan": 14438642.683144223,
+      "delta_vs_parent_yuan": -230954.57972735725,
+      "selected_updates": "06:00 + 12:00 + 18:00",
+      "recorded": "2026-09-12",
+      "copied_files": [
+        "result3.xlsx",
+        "summary.json",
+        "subset_comparison.csv",
+        "monthly_cost.csv",
+        "monthly_cost.png",
+        "table1.csv",
+        "table2_charge.csv",
+        "table2_discharge.csv",
+        "table2_soc.csv",
+        "table3_emergency.csv",
+        "forecast_quality.csv",
+        "block_forecast_mae.csv",
+        "sample_2025-06-21.png"
+      ]
+    }
+  ]
+}
