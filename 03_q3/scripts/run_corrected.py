@@ -52,7 +52,9 @@ def display(obj) -> None:
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 DATA_DIR = ROOT / "附件"
-OUTPUT_DIR = HERE / "outputs"
+if not DATA_DIR.exists():
+    DATA_DIR = ROOT.parent / "附件"
+OUTPUT_DIR = ROOT / "outputs"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # 组员原笔记本算出的全年总费用，只作对照，不是这次重跑

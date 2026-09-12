@@ -1,5 +1,5 @@
 {
-  "champion": "v002",
+  "champion": "v007",
   "versions": [
     {
       "id": "v000",
@@ -59,7 +59,7 @@
       "id": "v002",
       "slug": "free_battery_rest_greedy",
       "title": "解开三把电池锁：跨夜 SOC + 当天剩余时域重排 + 实时贪心充放",
-      "status": "champion",
+      "status": "kept",
       "parent": "v001",
       "folder": "v002_free_battery_rest_greedy",
       "total_cost_yuan": 13521409.707452236,
@@ -108,6 +108,58 @@
         "block_forecast_mae.csv",
         "sample_2025-06-21.png"
       ]
+    },
+    {
+      "id": "v004",
+      "slug": "true_valley_charge_grid",
+      "title": "真谷段 22:00–次日06:00 加充窗口（相对 v002 的全量扫描）",
+      "status": "discarded",
+      "parent": "v002",
+      "folder": "v004_true_valley_charge_grid",
+      "total_cost_yuan": 13521991.073727231,
+      "delta_vs_parent_yuan": 581.3662749957293,
+      "selected_updates": "06:00 + 12:00 + 18:00",
+      "recorded": "2026-09-12",
+      "copied_files": null
+    },
+    {
+      "id": "v005",
+      "slug": "price_aware_greedy_grid",
+      "title": "看电价的贪心：便宜时段缺口先不放电（相对 v002 的全量扫描）",
+      "status": "discarded",
+      "parent": "v002",
+      "folder": "v005_price_aware_greedy_grid",
+      "total_cost_yuan": 13521795.826955862,
+      "delta_vs_parent_yuan": 386.1195036265999,
+      "selected_updates": "06:00 + 12:00 + 18:00",
+      "recorded": "2026-09-12",
+      "copied_files": null
+    },
+    {
+      "id": "v006",
+      "slug": "terminal_value_dense_grid",
+      "title": "终端价值加密扫描（相对 v002 的全量扫描）",
+      "status": "discarded",
+      "parent": "v002",
+      "folder": "v006_terminal_value_dense_grid",
+      "total_cost_yuan": 13521406.73844815,
+      "delta_vs_parent_yuan": -2.9690040852874517,
+      "selected_updates": "06:00 + 12:00 + 18:00",
+      "recorded": "2026-09-12",
+      "copied_files": null
+    },
+    {
+      "id": "v007",
+      "slug": "q2_scenario_recourse_twostage",
+      "title": "第二问残差场景购电接到第三问滚动合同（两阶段松弛全年最优）",
+      "status": "champion",
+      "parent": "v002",
+      "folder": "v007_q2_scenario_recourse_twostage",
+      "total_cost_yuan": 13164261.157320466,
+      "delta_vs_parent_yuan": -357148.55013176985,
+      "selected_updates": "06:00 + 12:00 + 18:00",
+      "recorded": "2026-09-12",
+      "copied_files": null
     }
   ]
 }

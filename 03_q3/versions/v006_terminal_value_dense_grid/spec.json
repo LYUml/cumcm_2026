@@ -1,0 +1,46 @@
+{
+  "id": "v006",
+  "slug": "terminal_value_dense_grid",
+  "title": "终端价值加密扫描（相对 v002 的全量扫描）",
+  "status": "discarded",
+  "parent": "v002",
+  "kept_reason": "115 组里，单一终端价值在 0.445–0.465 元/度是一块平台，费用与 v002 的 0.4489 完全相同。两组「0 点 0.445/0.449、日内 0.50」账面便宜 2.97 元，但计划费、紧急电、开局 SOC 都与 v002 相同，只是调整量差约 2 度，属求解器抖动，不换正式方案。",
+  "created": "2026-09-12",
+  "recorded": "2026-09-12",
+  "code": "03_q3/scripts/run_terminal_value.py",
+  "search": {
+    "n_evaluations": 115,
+    "n_unique_lp_runs": 109,
+    "elapsed_s": 841.72,
+    "beats_v002_numerical": true,
+    "beats_v002_material": false,
+    "scalar_plateau_yuan_per_kwh": [
+      0.445,
+      0.465
+    ],
+    "cliff_above": 0.47,
+    "numerical_best": "split_da0.445_upd0.500",
+    "numerical_best_delta_yuan": -2.9690040852874517
+  },
+  "changed_from_parent": [
+    "只改剩余时域末了 SOC 的线性终端价值；规划、贪心、缓冲不变",
+    "允许 0 点与 6/12/18 点用不同的终端价值"
+  ],
+  "unchanged": "计费、v001 缓冲、0/6/12/18 改合同、剩余当天规划、锁死后贪心、电量从 1 月 15 日 6000 滚。",
+  "new_parameters": {
+    "terminal_value": "规划器给当天最后一格 SOC 的单价（元/kWh），不是结算科目",
+    "tv0 / tv6 / tv12 / tv18": "四个时点可以各自一个数；v002 是四个都用谷电均价 0.4489",
+    "named_anchors": "0、谷电均价、谷电×0.9、全日均价、峰值×0.9 等有经济含义的取值"
+  },
+  "results": {
+    "total_cost_yuan": 13521406.73844815,
+    "delta_vs_parent_yuan": -2.9690040852874517,
+    "selected_updates": "06:00 + 12:00 + 18:00",
+    "official_kept": {
+      "reason": "v002 的 0.4489 落在最优平台正中，正式方案不改",
+      "total_cost_yuan": 13521409.707452236,
+      "tv": 0.44891944444444437
+    }
+  },
+  "note": "低于 0.43：午夜剩电被当成太便宜，开局 SOC 掉到约 2000，全年贵 1.7 万以上。高于 0.47：规划器开始把电池囤满过夜，开局 SOC 冲到 5000–10800，全年贵 1.3 万到 16 万以上。0.445–0.465 是同一块平台。"
+}

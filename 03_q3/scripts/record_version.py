@@ -31,8 +31,9 @@ from datetime import date
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-OUTPUT_DIR = HERE / "outputs"
-VERSIONS_DIR = HERE / "versions"
+ROOT = HERE.parent if (HERE.parent / "versions").exists() else HERE
+OUTPUT_DIR = ROOT / "outputs"
+VERSIONS_DIR = ROOT / "versions"
 CATALOG_PATH = VERSIONS_DIR / "catalog.json"
 LEDGER_PATH = VERSIONS_DIR / "LEDGER.md"
 

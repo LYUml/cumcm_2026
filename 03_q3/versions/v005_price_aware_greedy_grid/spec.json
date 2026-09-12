@@ -1,0 +1,52 @@
+{
+  "id": "v005",
+  "slug": "price_aware_greedy_grid",
+  "title": "看电价的贪心：便宜时段缺口先不放电（相对 v002 的全量扫描）",
+  "status": "discarded",
+  "parent": "v002",
+  "kept_reason": "35 组全部没有低于 v002。两组 ratio=0.5 的窗内对照与 v002 数字完全相同（规则从未触发）。真正改动后最近的一组（按本窗预报给更贵时段留 50% 电量）仍贵 386.12 元。正式最优仍是 v002。",
+  "created": "2026-09-12",
+  "recorded": "2026-09-12",
+  "code": "03_q3/scripts/run_price_greedy.py",
+  "search": {
+    "n_policies": 35,
+    "elapsed_s": 275.95,
+    "beats_v002": false,
+    "terminal_value_kept": 0.44891944444444437,
+    "grid_best_name": "v002_baseline",
+    "identical_to_v002": [
+      "hold_vs_block_r0.5",
+      "hold_vs_block_r0.5_need"
+    ],
+    "closest_new_policy": "forecast_floor_block_c0.5",
+    "closest_new_cost_yuan": 13521795.826955862,
+    "note_on_baseline_replica": "网格里的 v002 复现总费用与正式 v002 完全一致。"
+  },
+  "changed_from_parent": [
+    "合同锁死后遇缺口不再无条件放电：便宜时段可以把电留到更贵的时段，缺口改打 5 倍紧急电",
+    "盈余侧不变：多出来的电仍先充电再弃电"
+  ],
+  "unchanged": "计费、v001 缓冲、0/6/12/18 改合同、剩余当天规划、电量从 1 月 15 日 6000 滚、终端价值仍按 PRICE[:36] 谷电均价。",
+  "new_parameters": {
+    "mode": "always=v002；hold_vs_remaining=当前电价低于后面最高价×ratio 则不放；hold_below=电价低于阈值则不放；hold_valley=22:00–06:00 不放；reserve_valley / reserve_below_mean=便宜时段放电不得低于 1200+预留；forecast_floor=按预报给后面更贵缺口留 SOC",
+    "scope": "block=只看本 6 小时窗剩余；day=看到当天结束",
+    "ratio": "hold_vs_remaining 的比例 0.5 / 0.75 / 1.0",
+    "price_cut": "hold_below 的电价阈值 0.45 / 0.55 / 0.80 / 1.00 / 1.20 元/kWh",
+    "reserve_kwh": "谷段或低于均价时的 SOC 预留 800 / 1600 / 3200 kWh（加在 1200 之上）",
+    "cover_ratio": "预报缺口里预先留下的比例 0.5 / 1.0 / 1.5",
+    "look_ahead": "0=看到 scope 末尾；12 / 36 格=只看未来 2 小时 / 6 小时",
+    "need_gate": "true=只有预报后面更贵时段仍缺电时才扣住电池"
+  },
+  "results": {
+    "total_cost_yuan": 13521795.826955862,
+    "delta_vs_parent_yuan": 386.1195036265999,
+    "selected_updates": "06:00 + 12:00 + 18:00",
+    "closest_policy": {
+      "name": "forecast_floor_block_c0.5",
+      "mean_soc_open_kwh": 2674.73,
+      "emergency_kwh": 12037.81,
+      "held_kwh": 5607.54
+    }
+  },
+  "note": "5×谷电紧急费约 2.1 元/度，高于后面高峰普通购电约 1.35 元/度；后面 6/12/18 点还会重排合同。锁死的 6 小时窗里，贵的时段通常在前（早高峰、晚高峰），便宜时段到来时高峰已经过完。扣住电池等于用 5 倍电换一次用不上的预留。"
+}

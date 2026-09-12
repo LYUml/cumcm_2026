@@ -1,0 +1,58 @@
+{
+  "id": "v004",
+  "slug": "true_valley_charge_grid",
+  "title": "真谷段 22:00–次日06:00 加充窗口（相对 v002 的全量扫描）",
+  "status": "discarded",
+  "parent": "v002",
+  "kept_reason": "74 组全部没有低于 v002。最近一组只是禁止 18:00–22:00 规划充电（不加目标），仍贵 581.37 元。带午夜/6 点目标的加充更贵。正式最优仍是 v002。",
+  "created": "2026-09-12",
+  "recorded": "2026-09-12",
+  "code": "03_q3/scripts/run_valley_charge.py",
+  "search": {
+    "n_policies": 74,
+    "elapsed_s": 580.9,
+    "beats_v002": false,
+    "valley_slots": 48,
+    "terminal_value_kept": 0.44891944444444437,
+    "grid_best_name": "v002_baseline",
+    "closest_new_policy": "mask_only_forbid_18_22",
+    "closest_new_cost_yuan": 13521991.073727231,
+    "closest_extra_charge_policy": "midnight_hist_morning_c0.3_n48_soft",
+    "closest_extra_charge_cost_yuan": 13525357.449366083,
+    "note_on_baseline_replica": "网格里的 v002 复现用 PRICE[:36] 谷电均价 0.4489，与正式 v002 总费用完全一致。"
+  },
+  "changed_from_parent": [
+    "加充窗口改为真正的谷段：22:00 到次日 06:00（48 格），18:00–22:00 高峰禁止规划充电",
+    "SOC 目标可以放在午夜，也可以放在当天 6:00",
+    "目标可以是固定 kWh，或按（今晨 / 次日上午）净负荷预测 × 覆盖比例"
+  ],
+  "unchanged": "计费、v001 缓冲、0/6/12/18 改合同、剩余当天规划、锁死后贪心、电量从 1 月 15 日 6000 滚、终端价值仍按 PRICE[:36] 谷电均价。",
+  "new_parameters": {
+    "valley_window": "22:00–次日 06:00，48 格；白天光伏充电仍允许；18:00–22:00 规划充电关闭",
+    "n_cheapest": "剩余谷段里只允许最便宜的 N 格规划加充；N=12 或全部 48。0 点规划若 N=12，会砍掉大半凌晨谷段",
+    "waypoint": "midnight=午夜 SOC 目标；six=当天 6:00 的 SOC 目标（用今晨 6–12 点需电量）",
+    "target_mode": "off=对照；mask_only=只禁高峰、不加目标；fixed=固定电量；forecast=按需电量推目标",
+    "fixed_kwh": "3000/4000/5000",
+    "need_kind": "hist_morning=过去同星期几上午正净负荷；hybrid_morning=历史负荷 + 当时光伏预报",
+    "cover_ratio": "0.3/0.5/0.8，再除以 0.9 放电效率，从 1200 往上加，封顶 10800",
+    "enforce": "soft=达不到目标按 1 元/度罚款；ge=必须 ≥ 目标，不可解则退回 soft",
+    "shortfall_penalty": 1.0
+  },
+  "results": {
+    "total_cost_yuan": 13521991.073727231,
+    "delta_vs_parent_yuan": 581.366274997592,
+    "selected_updates": "06:00 + 12:00 + 18:00",
+    "closest_policy": {
+      "name": "mask_only_forbid_18_22",
+      "mean_soc_open_kwh": 2667.42
+    },
+    "closest_extra_charge": {
+      "name": "midnight_hist_morning_c0.3_n48_soft",
+      "mean_soc_open_kwh": 4768.33,
+      "mean_target_kwh": 4018.06,
+      "total_cost_yuan": 13525357.449366083,
+      "delta_vs_v002_yuan": 3947.741913849488
+    }
+  },
+  "note": "v002 几乎不会在 18:00–22:00 规划充电（只禁高峰才贵 581 元）。把目标改到 6:00、或再囤谷电到早上，调整费上升，总费用更高。真谷段窗口本身改变不了「人为加充更贵」的结论。"
+}

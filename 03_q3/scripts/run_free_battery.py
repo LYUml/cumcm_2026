@@ -61,10 +61,11 @@ def solve_horizon(
     end_soc_mode: str = "soft",
     shortfall_penalty: float = 1.0,
     charge_allowed: np.ndarray | None = None,
+    soc_target_index: int | None = None,
 ) -> dict[str, np.ndarray]:
     """Remaining-horizon purchase + battery LP.
 
-    Optional midnight SOC target (soft shortfall penalty, or SOC >= target).
+    Optional SOC target at one horizon index (default: last slot).
     charge_allowed: per-slot mask; False forbids planned charging in that slot.
     Defaults keep the original v002 behaviour.
     """
@@ -166,24 +167,28 @@ def solve_horizon(
     clipped_target = None
     if end_soc_target is not None:
         clipped_target = float(np.clip(end_soc_target, SOC_MIN, SOC_MAX))
+        if soc_target_index is None:
+            target_pos = soc.stop - 1
+        else:
+            target_pos = soc.start + int(np.clip(soc_target_index, 0, horizon - 1))
         mode = end_soc_mode
         if mode == "soft":
             eq = hstack([eq, csr_matrix((n_eq, 1))])
             objective = np.append(objective, float(shortfall_penalty))
             bounds.append((0.0, None))
             a_ub = np.zeros((1, n_var + 1))
-            a_ub[0, soc.stop - 1] = -1.0
+            a_ub[0, target_pos] = -1.0
             a_ub[0, -1] = -1.0
             b_ub = np.array([-clipped_target])
         elif mode == "ge":
             a_ub = np.zeros((1, n_var))
-            a_ub[0, soc.stop - 1] = -1.0
+            a_ub[0, target_pos] = -1.0
             b_ub = np.array([-clipped_target])
         elif mode == "eq":
             from scipy.sparse import vstack
 
             extra = lil_matrix((1, n_var))
-            extra[0, soc.stop - 1] = 1.0
+            extra[0, target_pos] = 1.0
             eq = vstack([eq.tocsr(), extra.tocsr()])
             rhs = np.append(rhs, clipped_target)
         else:
@@ -294,10 +299,21 @@ def follow_plan_recourse(
     }
 
 
+def resolve_terminal_value(terminal_value: float | dict, issue_hour: int) -> float:
+    """Scalar TV, or per-issue-hour map (keys 0/6/12/18)."""
+    if isinstance(terminal_value, dict):
+        if issue_hour in terminal_value:
+            return float(terminal_value[issue_hour])
+        if "default" in terminal_value:
+            return float(terminal_value["default"])
+        raise KeyError(f"No terminal value for issue hour {issue_hour}")
+    return float(terminal_value)
+
+
 def simulate_year(
     horizon: str,
     recourse: str,
-    terminal_value: float,
+    terminal_value: float | dict,
     update_hours: tuple[int, ...] = (6, 12, 18),
 ) -> dict:
     n_days = len(rc.DATES)
@@ -326,7 +342,7 @@ def simulate_year(
             rc.PRICE,
             current_soc,
             baseline_purchase=None,
-            terminal_value=terminal_value,
+            terminal_value=resolve_terminal_value(terminal_value, 0),
         )
         day_plan[:] = da["purchase"]
 
@@ -343,7 +359,7 @@ def simulate_year(
                             rc.PRICE[sl],
                             current_soc,
                             baseline_purchase=day_plan[sl],
-                            terminal_value=terminal_value,
+                            terminal_value=resolve_terminal_value(terminal_value, issue),
                         )
                     exec_purchase = planned["purchase"][: end - start]
                     exec_ch = planned["charge"][: end - start]
@@ -360,7 +376,7 @@ def simulate_year(
                             rc.PRICE[sl],
                             current_soc,
                             baseline_purchase=day_plan[sl],
-                            terminal_value=terminal_value,
+                            terminal_value=resolve_terminal_value(terminal_value, issue),
                         )
                         exec_purchase = planned["purchase"]
                         exec_ch = planned["charge"]
