@@ -1,5 +1,5 @@
 {
-  "champion": "v007",
+  "champion": "v008",
   "versions": [
     {
       "id": "v000",
@@ -152,11 +152,24 @@
       "id": "v007",
       "slug": "q2_scenario_recourse_twostage",
       "title": "第二问残差场景购电接到第三问滚动合同（两阶段松弛全年最优）",
-      "status": "champion",
+      "status": "kept",
       "parent": "v002",
       "folder": "v007_q2_scenario_recourse_twostage",
       "total_cost_yuan": 13164261.157320466,
       "delta_vs_parent_yuan": -357148.55013176985,
+      "selected_updates": "06:00 + 12:00 + 18:00",
+      "recorded": "2026-09-12",
+      "copied_files": null
+    },
+    {
+      "id": "v008",
+      "slug": "twostage_lambda_0p65",
+      "title": "两阶段规划缺电权重 λ：0.90 → 0.65",
+      "status": "champion",
+      "parent": "v007",
+      "folder": "v008_twostage_lambda_0p65",
+      "total_cost_yuan": 13125075.202234216,
+      "delta_vs_parent_yuan": -39185.95508624986,
       "selected_updates": "06:00 + 12:00 + 18:00",
       "recorded": "2026-09-12",
       "copied_files": null
